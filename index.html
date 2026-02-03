@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Arbeitszeit V30">
-    <title>Arbeitszeit Tracker V30</title>
+    <meta name="apple-mobile-web-app-title" content="Arbeitszeit V31">
+    <title>Arbeitszeit Tracker V31</title>
 
     <style>
         :root {
@@ -109,7 +109,7 @@
             border-radius: 10px; 
             font-size: 14px; 
             font-weight: 700; 
-            margin-bottom: 20px; 
+            margin-bottom: 10px; 
             cursor: pointer;
             box-shadow: 0 4px 10px rgba(10, 132, 255, 0.3);
         }
@@ -186,6 +186,18 @@
         .u-name { font-weight: 600; text-align: right; flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; pointer-events: none; }
 
         /* KALENDER */
+        /* V31 Sticky Header Style */
+        #cal-sticky-header {
+            position: sticky;
+            top: -15px; /* Negativ, um Main-Padding auszugleichen */
+            background-color: var(--bg);
+            z-index: 50;
+            padding-top: 15px;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid var(--card-border);
+        }
+
         .year-selector { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 18px; font-weight: bold; }
         .year-btn { background: none; border: none; color: var(--accent); font-size: 24px; cursor: pointer; padding: 0 20px; }
         
@@ -208,7 +220,7 @@
         
         .calendar-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
         @media (orientation: landscape) { .calendar-grid { grid-template-columns: 1fr 1fr 1fr; } }
-        .month-card { background-color: var(--card); padding: 10px; border-radius: 8px; border: 1px solid var(--card-border); }
+        .month-card { background-color: var(--card); padding: 10px; border-radius: 8px; border: 1px solid var(--card-border); scroll-margin-top: 180px; /* Für Scrollen */ }
         .month-name { text-align: center; font-weight: 600; margin-bottom: 10px; color: var(--text-sub); text-transform: uppercase; font-size: 12px; }
         .days-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; }
         .day-label { font-size: 9px; color: #555; padding-bottom: 5px; }
@@ -382,21 +394,23 @@
         </div>
 
         <div id="view-calendar" class="view">
-            <div class="year-selector">
-                <button class="year-btn" onclick="changeYear(-1)">‹</button>
-                <span id="calendar-year-display">2026</span>
-                <button class="year-btn" onclick="changeYear(1)">›</button>
-            </div>
-            
-            <div class="cal-filter-container">
-                <div class="cal-filter-btn active" onclick="setCalFilter('all', this)">Alle</div>
-                <div class="cal-filter-btn" onclick="setCalFilter('taken', this)">Genommen</div>
-                <div class="cal-filter-btn" onclick="setCalFilter('earned', this)">Erhalten</div>
-                <div class="cal-filter-btn" onclick="setCalFilter('termin', this)">Termin</div>
-                <div class="cal-filter-btn" onclick="setCalFilter('dienst', this)">Dienst</div>
-            </div>
+            <div id="cal-sticky-header">
+                <div class="year-selector">
+                    <button class="year-btn" onclick="changeYear(-1)">‹</button>
+                    <span id="calendar-year-display">2026</span>
+                    <button class="year-btn" onclick="changeYear(1)">›</button>
+                </div>
+                
+                <div class="cal-filter-container">
+                    <div class="cal-filter-btn active" onclick="setCalFilter('all', this)">Alle</div>
+                    <div class="cal-filter-btn" onclick="setCalFilter('taken', this)">Genommen</div>
+                    <div class="cal-filter-btn" onclick="setCalFilter('earned', this)">Erhalten</div>
+                    <div class="cal-filter-btn" onclick="setCalFilter('termin', this)">Termin</div>
+                    <div class="cal-filter-btn" onclick="setCalFilter('dienst', this)">Dienst</div>
+                </div>
 
-            <button class="btn-list-view" onclick="openListModal()">📋 Liste anzeigen</button>
+                <button class="btn-list-view" onclick="openListModal()">📋 Liste anzeigen</button>
+            </div>
 
             <div class="calendar-grid" id="calendar-root"></div>
             
@@ -1015,12 +1029,22 @@
             });
         }
 
-        // V28: MODAL LIST + NOTIZEN
+        // V31: SORT HELPER (Time Parse)
+        function getTimeFromEntry(e) {
+            // Versuche Zeit aus timeDesc zu lesen (Format "14:30 Uhr")
+            if(!e.timeDesc) return "00:00";
+            const match = e.timeDesc.match(/(\d{1,2}):(\d{2})/);
+            if(match) {
+                return match[1].padStart(2,'0') + ":" + match[2];
+            }
+            return "00:00"; // Fallback
+        }
+
+        // V31: MODAL LIST + SORTIERUNG
         function openListModal() {
             const container = document.getElementById('list-view-body');
             container.innerHTML = '';
             
-            // Titel Setzen
             let title = "Alle Einträge";
             if(calendarFilter === 'taken') title = "Genommen (Urlaub/Frei)";
             else if(calendarFilter === 'earned') title = "Erhalten (Stunden)";
@@ -1029,7 +1053,7 @@
             document.getElementById('list-modal-title').innerText = title;
 
             // Filtern
-            const yearEntries = entries.filter(e => {
+            let yearEntries = entries.filter(e => {
                 ensureIsoDates(e);
                 if(!e.isoStart) return false;
                 
@@ -1039,7 +1063,19 @@
                 if(calendarFilter === 'termin') return e.cat === 'Termin';
                 if(calendarFilter === 'dienst') return e.cat === 'Dienst';
                 return false;
-            }).sort((a,b) => a.isoStart.localeCompare(b.isoStart)); 
+            });
+
+            // V31: STRICT CHRONOLOGICAL SORT (Date + Time)
+            yearEntries.sort((a,b) => {
+                // 1. Datum Vergleich
+                const dateComp = a.isoStart.localeCompare(b.isoStart);
+                if(dateComp !== 0) return dateComp;
+                
+                // 2. Zeit Vergleich (wenn Datum gleich)
+                const timeA = getTimeFromEntry(a);
+                const timeB = getTimeFromEntry(b);
+                return timeA.localeCompare(timeB);
+            }); 
 
             if(yearEntries.length === 0) {
                 container.innerHTML = '<div style="text-align:center; padding:20px; color:#666;">Keine Einträge gefunden.</div>';
@@ -1068,7 +1104,6 @@
                      if(e.cat === 'Urlaub' || e.cat === 'Stunden') displayTitle = e.cat + " ("+e.timeDesc+")";
                 }
 
-                // V28: Note Logic
                 let noteHtml = '';
                 if(e.note && e.cat !== 'Termin' && e.cat !== 'Dienst') {
                     noteHtml = `<div style="font-size:12px; color:#aaa; font-style:italic; margin-top:2px;">"${e.note}"</div>`;
@@ -1121,9 +1156,20 @@
             root.innerHTML = '';
             const months = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"];
 
+            // V31: Ermittle aktuellen Monat für Auto-Scroll
+            const now = new Date();
+            const currentMonthIdx = now.getMonth();
+            const currentYear = now.getFullYear();
+
             for (let i = 0; i < 12; i++) {
                 const monthDiv = document.createElement('div');
                 monthDiv.className = 'month-card';
+                
+                // V31: ID für Auto-Scroll setzen
+                if(currentCalYear === currentYear && i === currentMonthIdx) {
+                    monthDiv.id = 'current-month-card';
+                }
+
                 const title = document.createElement('div');
                 title.className = 'month-name';
                 title.innerText = months[i];
@@ -1216,7 +1262,7 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = "backup_v30_full_" + new Date().toISOString().slice(0,10) + ".json";
+            a.download = "backup_v31_full_" + new Date().toISOString().slice(0,10) + ".json";
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -1265,6 +1311,14 @@
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             el.classList.add('active');
             document.getElementById('header-title').innerText = title;
+
+            // V31: Auto Scroll wenn Kalender geöffnet wird
+            if(id === 'view-calendar') {
+                setTimeout(() => {
+                    const cur = document.getElementById('current-month-card');
+                    if(cur) cur.scrollIntoView({behavior: "smooth", block: "center"});
+                }, 150);
+            }
         }
 
         // --- POPUP LOGIC ---
@@ -1276,6 +1330,9 @@
             body.innerHTML = '';
 
             if(events && events.length > 0) {
+                // V31: Sortiere auch im Popup chronologisch
+                events.sort((a,b) => getTimeFromEntry(a).localeCompare(getTimeFromEntry(b)));
+
                 events.forEach(e => {
                     let displayVal = "";
                     let displayName = e.cat;
