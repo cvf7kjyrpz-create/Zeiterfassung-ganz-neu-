@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Arbeitszeit V28">
-    <title>Arbeitszeit Tracker V28</title>
+    <meta name="apple-mobile-web-app-title" content="Arbeitszeit V29">
+    <title>Arbeitszeit Tracker V29</title>
 
     <style>
         :root {
@@ -449,7 +449,10 @@
                     <div class="modal-type-btn" id="type-dienst" onclick="setModalType('Dienst')">Dienst</div>
                 </div>
 
-                <input type="text" id="modal-note-input" placeholder="Beschreibung (z.B. Zahnarzt)" style="margin-bottom:10px; font-size:14px;">
+                <div style="display:flex; gap:10px; margin-bottom:10px;">
+                    <input type="time" id="modal-time-input" style="width: 110px; font-size:14px;">
+                    <input type="text" id="modal-note-input" placeholder="Beschreibung..." style="flex:1; font-size:14px;">
+                </div>
                 
                 <div class="modal-color-row">
                     <div class="modal-color-btn selected" style="background-color: var(--note-pink)" onclick="selectModalColor(this, 'pink')"></div>
@@ -1112,93 +1115,67 @@
             jumpToDate(isoDate);
         }
 
-        function renderCalendar() {
-            document.getElementById('calendar-year-display').innerText = currentCalYear;
-            const root = document.getElementById('calendar-root');
-            root.innerHTML = '';
-            const months = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"];
+        // --- IMPORT / EXPORT (V26) ---
+        function exportData() {
+            // V26: Save both entries AND settings
+            const exportObj = {
+                entries: entries,
+                settings: settings
+            };
+            const dataStr = JSON.stringify(exportObj);
+            const blob = new Blob([dataStr], {type: "application/json"});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "backup_v29_full_" + new Date().toISOString().slice(0,10) + ".json";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
 
-            for (let i = 0; i < 12; i++) {
-                const monthDiv = document.createElement('div');
-                monthDiv.className = 'month-card';
-                const title = document.createElement('div');
-                title.className = 'month-name';
-                title.innerText = months[i];
-                monthDiv.appendChild(title);
-                const daysGrid = document.createElement('div');
-                daysGrid.className = 'days-grid';
-
-                const weekDays = ["M","D","M","D","F","S","S"];
-                weekDays.forEach(d => {
-                    const l = document.createElement('div');
-                    l.className = 'day-label';
-                    l.innerText = d;
-                    daysGrid.appendChild(l);
-                });
-
-                const firstDay = new Date(currentCalYear, i, 1).getDay();
-                let startOffset = firstDay === 0 ? 6 : firstDay - 1;
-                const daysInMonth = new Date(currentCalYear, i + 1, 0).getDate();
-
-                for(let j=0; j<startOffset; j++) {
-                    const empty = document.createElement('div');
-                    empty.className = 'day-cell empty';
-                    daysGrid.appendChild(empty);
-                }
-
-                for(let d=1; d<=daysInMonth; d++) {
-                    const cell = document.createElement('div');
-                    cell.className = 'day-cell';
-                    let spanNum = document.createElement('span');
-                    spanNum.innerText = d;
-                    cell.appendChild(spanNum);
-
-                    const mStr = (i+1).toString().padStart(2, '0');
-                    const dStr = d.toString().padStart(2, '0');
-                    const isoDate = `${currentCalYear}-${mStr}-${dStr}`;
-
-                    const dayEvents = getEventsForDate(isoDate);
-                    
-                    const dotsContainer = document.createElement('div');
-                    dotsContainer.className = 'event-dots';
-
-                    if(dayEvents.length > 0) {
-                        let visibleEvents = dayEvents.filter(e => {
-                            if(calendarFilter === 'all') {
-                                if(e.cat === 'Termin' || e.cat === 'Dienst' || e.mode === 'taken') return true;
-                                return false;
-                            }
-                            return true;
-                        });
-
-                        visibleEvents.forEach(e => {
-                            let dot = document.createElement('div');
-                            dot.className = 'event-dot';
-                            
-                            let bg = '#555';
-                            if(e.color) bg = e.color;
-                            else if(e.cat.startsWith('Urlaub')) bg = 'var(--c-urlaub)';
-                            else if(e.cat.startsWith('Stunden')) bg = 'var(--c-stunden)';
-                            else if(e.cat.startsWith('Kind')) bg = 'var(--c-krank)';
-                            else if(e.cat.startsWith('DA')) bg = 'var(--c-da)';
-                            else if(e.cat.startsWith('Lang')) bg = 'var(--c-lzk)';
-                            else if(e.cat.startsWith('Sonder')) bg = 'var(--c-sonder)';
-                            
-                            dot.style.backgroundColor = bg;
-                            dotsContainer.appendChild(dot);
-                        });
-                        
-                        if(visibleEvents.length > 0) cell.classList.add('has-event');
+        function importData(input) {
+            const file = input.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const json = JSON.parse(e.target.result);
+                    if(confirm("Daten und Einstellungen überschreiben?")) {
+                        // V26 Smart Import
+                        if(Array.isArray(json)) {
+                            // Old format (only entries)
+                            entries = json;
+                            localStorage.setItem('trackData_v5', JSON.stringify(entries));
+                        } else if (json.entries && json.settings) {
+                            // New format (entries + settings)
+                            entries = json.entries;
+                            settings = json.settings;
+                            localStorage.setItem('trackData_v5', JSON.stringify(entries));
+                            localStorage.setItem('trackSettings_v17', JSON.stringify(settings));
+                        }
+                        updateUI();
+                        alert("Erfolgreich geladen!");
                     }
-                    
-                    cell.appendChild(dotsContainer);
-                    cell.onclick = () => openModal(isoDate, dayEvents);
-                    daysGrid.appendChild(cell);
-                }
+                } catch(err) { alert("Fehler beim Laden: " + err); }
+            };
+            reader.readAsText(file);
+            input.value = '';
+        }
 
-                monthDiv.appendChild(daysGrid);
-                root.appendChild(monthDiv);
+        function resetAll() {
+            if(confirm("ALLES löschen?")) {
+                localStorage.removeItem('trackData_v5');
+                entries = [];
+                updateUI();
             }
+        }
+
+        function showView(id, el, title) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('header-title').innerText = title;
         }
 
         // --- POPUP LOGIC ---
@@ -1253,6 +1230,7 @@
             
             // Reset Modal Input
             document.getElementById('modal-note-input').value = "";
+            document.getElementById('modal-time-input').value = ""; // RESET TIME
             setModalType('Termin'); 
             modalSelectedColor = 'pink';
             document.querySelectorAll('.modal-color-btn').forEach(b => b.classList.remove('selected'));
@@ -1278,15 +1256,22 @@
             const text = document.getElementById('modal-note-input').value;
             if(!text) { alert("Bitte Namen eingeben"); return; }
             
+            const timeVal = document.getElementById('modal-time-input').value;
+            let displayTime = modalSelectedType; // Default "Termin"
+            
+            if(timeVal) {
+                displayTime = timeVal + " Uhr";
+            }
+
             const colorCode = COLOR_MAP[modalSelectedColor];
             
             const newEntry = {
                 id: Date.now(),
-                cat: modalSelectedType, // 'Termin' oder 'Dienst'
+                cat: modalSelectedType, 
                 date: formatDateDE(modalCurrentIsoDate),
                 isoStart: modalCurrentIsoDate,
                 isoEnd: modalCurrentIsoDate,
-                timeDesc: modalSelectedType,
+                timeDesc: displayTime, // Contains Type or Time
                 hours: 0,
                 mode: 'note',
                 note: text,
@@ -1321,69 +1306,6 @@
         }
         function closeModalDirect() {
             document.getElementById('day-modal').classList.remove('open');
-        }
-
-        // --- IMPORT / EXPORT (V26) ---
-        function exportData() {
-            // V26: Save both entries AND settings
-            const exportObj = {
-                entries: entries,
-                settings: settings
-            };
-            const dataStr = JSON.stringify(exportObj);
-            const blob = new Blob([dataStr], {type: "application/json"});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = "backup_v28_full_" + new Date().toISOString().slice(0,10) + ".json";
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        }
-
-        function importData(input) {
-            const file = input.files[0];
-            if(!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const json = JSON.parse(e.target.result);
-                    if(confirm("Daten und Einstellungen überschreiben?")) {
-                        // V26 Smart Import
-                        if(Array.isArray(json)) {
-                            // Old format (only entries)
-                            entries = json;
-                            localStorage.setItem('trackData_v5', JSON.stringify(entries));
-                        } else if (json.entries && json.settings) {
-                            // New format (entries + settings)
-                            entries = json.entries;
-                            settings = json.settings;
-                            localStorage.setItem('trackData_v5', JSON.stringify(entries));
-                            localStorage.setItem('trackSettings_v17', JSON.stringify(settings));
-                        }
-                        updateUI();
-                        alert("Erfolgreich geladen!");
-                    }
-                } catch(err) { alert("Fehler beim Laden: " + err); }
-            };
-            reader.readAsText(file);
-            input.value = '';
-        }
-
-        function resetAll() {
-            if(confirm("ALLES löschen?")) {
-                localStorage.removeItem('trackData_v5');
-                entries = [];
-                updateUI();
-            }
-        }
-
-        function showView(id, el, title) {
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            el.classList.add('active');
-            document.getElementById('header-title').innerText = title;
         }
     </script>
 </body>
