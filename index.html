@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Arbeitszeit V45">
-    <title>Arbeitszeit Tracker V45</title>
+    <meta name="apple-mobile-web-app-title" content="Arbeitszeit V47">
+    <title>Arbeitszeit Tracker V47</title>
 
     <style>
         :root {
@@ -72,7 +72,6 @@
         .year-selector { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 18px; font-weight: bold; }
         .year-btn { background: none; border: none; color: var(--accent); font-size: 24px; cursor: pointer; padding: 0 20px; }
         
-        /* UPDATE FILTER DROPDOWN: Scrollbar support */
         .filter-wrapper { position: relative; display: inline-block; }
         .filter-toggle-btn { 
             background: var(--card); border: 1px solid var(--card-border); color: var(--text-sub);
@@ -85,7 +84,7 @@
             background: #2c2c2e; border: 1px solid #444; border-radius: 10px; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 200;
             display: none; flex-direction: column; min-width: 160px;
-            max-height: 300px; overflow-y: auto; /* SCROLLBAR */
+            max-height: 300px; overflow-y: auto; 
         }
         .filter-dropdown-menu.show { display: flex; }
         .filter-option { padding: 12px 15px; color: #ddd; font-size: 13px; cursor: pointer; border-bottom: 1px solid #3a3a3c; }
@@ -137,10 +136,30 @@
         .stat-box.full-width { grid-column: span 3; padding: 8px; cursor: default; text-align: left;}
 
         .data-tools { margin-top: 10px; padding-top: 15px; border-top: 1px solid var(--card-border); display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        
+        /* SETTINGS BUTTON NEU */
+        .btn-settings-big { 
+            grid-column: span 2; background: #2c2c2e; border: 1px solid #555; color: white; 
+            padding: 15px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; text-align: center;
+        }
         .btn-tool { padding: 10px; background: var(--card); border: 1px solid var(--card-border); color: var(--text); border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
         
+        /* SETTINGS CONTENT STYLE */
         .settings-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
         .settings-table td { padding: 5px; }
+        
+        .rem-config-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #333; }
+        .rem-config-label { flex: 1; font-size: 13px; }
+        .rem-config-inputs { display: flex; align-items: center; gap: 8px; }
+        .rem-days-input { width: 50px; text-align: center; padding: 5px; border-radius: 5px; border: 1px solid #444; background: #1c1c1e; color: white; }
+        
+        /* Checkbox Style */
+        .toggle-switch { position: relative; display: inline-block; width: 40px; height: 24px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #444; transition: .4s; border-radius: 24px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--accent); }
+        input:checked + .slider:before { transform: translateX(16px); }
 
         nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.95); border-top: 1px solid #333; display: flex; height: 50px; padding-bottom: env(safe-area-inset-bottom); z-index: 500; }
         .nav-item { flex: 1; display: flex; justify-content: center; align-items: center; color: #666; font-size: 22px; transition: color 0.2s; }
@@ -193,9 +212,12 @@
                              <div class="filter-option" onclick="applyFilter('Urlaub', 'Urlaub')">Urlaub</div>
                              <div class="filter-option" onclick="applyFilter('StundenTaken', 'Stunden (Genommen)')">Stunden (Genommen)</div>
                              <div class="filter-option" onclick="applyFilter('StundenEarned', 'Stunden (Bekommen)')">Stunden (Bekommen)</div>
+                             
+                             <div class="filter-option" onclick="applyFilter('Übungsplatz', 'Übungspl. (Blau)')">Übungspl. (Blau)</div>
+                             <div class="filter-option" onclick="applyFilter('Übungsplatz Grün', 'Übungspl. (Grün)')">Übungspl. (Grün)</div>
+                             
                              <div class="filter-option" onclick="applyFilter('Arzttermin', 'Arzt')">Arzt</div>
                              <div class="filter-option" onclick="applyFilter('Ausbildung', 'Ausbildung')">Ausbildung</div>
-                             <div class="filter-option" onclick="applyFilter('Übungsplatz', 'Übungsplatz')">Übungsplatz</div>
                              <div class="filter-option" onclick="applyFilter('UvD', 'UvD')">UvD</div>
                              <div class="filter-option" onclick="applyFilter('UvD Standort', 'UvD Standort')">UvD Standort</div>
                              <div class="filter-option" onclick="applyFilter('KvD', 'KvD')">KvD</div>
@@ -220,7 +242,8 @@
         <div id="view-stats" class="view">
             <div class="stats-grid" id="stats-grid"></div>
             <div class="data-tools">
-                <button class="btn-tool" onclick="openSettings()">⚙️ Zeiten</button>
+                <button class="btn-settings-big" onclick="openSettings()">⚙️ Einstellungen / Erinnerungen</button>
+                
                 <button class="btn-tool" onclick="exportData()">💾 Backup</button>
                 <button class="btn-tool" onclick="document.getElementById('file-upload').click()">📂 Laden</button>
                 <input type="file" id="file-upload" accept=".json" style="display:none" onchange="importData(this)">
@@ -262,8 +285,10 @@
             <div id="modal-body" style="margin-bottom:15px; border-bottom:1px solid #333; padding-bottom:10px;"></div>
             <div class="modal-add-title" style="margin-bottom:10px;">Neuer Eintrag</div>
             <div class="category-grid">
+                <div class="cat-btn" data-cat="Übungsplatz" onclick="selectModalCat(this, 'Übungsplatz', '🔧', 'note')"><span class="cat-btn-icon">🔧</span>Übungspl. B</div>
+                <div class="cat-btn" data-cat="Übungsplatz Grün" onclick="selectModalCat(this, 'Übungsplatz Grün', '🌳', 'note')"><span class="cat-btn-icon">🌳</span>Übungspl. G</div>
+                
                 <div class="cat-btn" data-cat="Arzttermin" onclick="selectModalCat(this, 'Arzttermin', '💉', 'note')"><span class="cat-btn-icon">💉</span>Arzt</div>
-                <div class="cat-btn" data-cat="Übungsplatz" onclick="selectModalCat(this, 'Übungsplatz', '🔧', 'note')"><span class="cat-btn-icon">🔧</span>Übungspl.</div>
                 <div class="cat-btn" data-cat="Stunden" onclick="selectModalCat(this, 'Stunden', '⏰', 'taken')"><span class="cat-btn-icon">⏰</span>Stunden</div>
                 <div class="cat-btn" data-cat="Urlaub" onclick="selectModalCat(this, 'Urlaub', '🌴', 'taken')"><span class="cat-btn-icon">🌴</span>Urlaub</div>
                 <div class="cat-btn" data-cat="DA" onclick="selectModalCat(this, 'DA', '🌴', 'taken')"><span class="cat-btn-icon">🌴</span>DA</div>
@@ -300,7 +325,14 @@
     <div id="settings-modal" class="modal-overlay" onclick="closeSettings(event)">
         <div class="modal-content">
             <div class="modal-header"><div class="modal-title">Einstellungen</div><button class="close-btn" onclick="document.getElementById('settings-modal').classList.remove('open')">×</button></div>
+            
+            <div style="margin-bottom:15px; font-weight:bold; color:var(--accent); font-size:14px;">Erinnerungen konfigurieren</div>
+            <div id="reminders-config-container">
+                </div>
+
+            <div style="margin-top:20px; margin-bottom:15px; font-weight:bold; color:var(--accent); font-size:14px; border-top:1px solid #333; padding-top:10px;">Standard Arbeitszeiten</div>
             <table class="settings-table"><thead><tr><th>Tag</th><th>Von</th><th>Bis</th></tr></thead><tbody id="settings-tbody"></tbody></table>
+            
             <button class="btn btn-primary" onclick="saveSettings()" style="margin-top:20px;">Speichern</button>
         </div>
     </div>
@@ -313,7 +345,24 @@
     </nav>
     <script>
         let entries = JSON.parse(localStorage.getItem('trackData_v5')) || [];
-        let settings = JSON.parse(localStorage.getItem('trackSettings_v17')) || { schedule: [{s:"00:00",e:"00:00"},{s:"07:00",e:"16:00"},{s:"07:00",e:"16:00"},{s:"07:00",e:"16:00"},{s:"07:00",e:"16:00"},{s:"07:00",e:"13:00"},{s:"00:00",e:"00:00"}] };
+        
+        // STANDARD EINSTELLUNGEN MIT REMINDERS
+        const defaultSettings = { 
+            schedule: [{s:"00:00",e:"00:00"},{s:"07:00",e:"16:00"},{s:"07:00",e:"16:00"},{s:"07:00",e:"16:00"},{s:"07:00",e:"16:00"},{s:"07:00",e:"13:00"},{s:"00:00",e:"00:00"}],
+            reminders: {
+                uvd: { active: true, days: 1, label: "UvD/KvD (Danach)" },
+                arzt: { active: true, days: 1, label: "Arzt (Danach)" },
+                urlaub: { active: true, days: 14, label: "Urlaub/Antrag (Davor)" },
+                stunden: { active: true, days: 5, label: "Std. Abbau (Davor)" },
+                uebungsplatz: { active: true, days: 21, label: "Übungsplatz (Danach)" }
+            }
+        };
+        
+        // Laden oder Defaults nutzen
+        let settings = JSON.parse(localStorage.getItem('trackSettings_v17')) || defaultSettings;
+        // Migration: Falls reminders fehlt (bei alten Usern)
+        if(!settings.reminders) settings.reminders = defaultSettings.reminders;
+
         let mode = 'taken'; 
         let currentCalYear = new Date().getFullYear(); 
         let calendarFilter = 'all'; 
@@ -325,7 +374,8 @@
 
         const CAT_CONFIG = {
             'Arzttermin': { icon: '💉', type: 'note' },
-            'Übungsplatz': { icon: '🔧', type: 'note' },
+            'Übungsplatz': { icon: '🔧', type: 'note' }, // Blau
+            'Übungsplatz Grün': { icon: '🌳', type: 'note' }, // GRÜN (Laubbaum)
             'Urlaub': { icon: '🌴', type: 'taken' },
             'DA': { icon: '🌴', type: 'taken' },
             'Langzeitkonto': { icon: '🌴', type: 'taken' },
@@ -361,11 +411,13 @@
             renderCalendar();
         }
 
-        // --- INTELLIGENTE ERINNERUNGEN ---
+        // --- INTELLIGENTE ERINNERUNGEN MIT CONFIG ---
         function checkReminders() {
             const today = new Date();
             today.setHours(0,0,0,0);
             activeReminders = [];
+            
+            const cfg = settings.reminders; // Hole Config
 
             entries.forEach(e => {
                 if(e.reminderDismissed) return;
@@ -373,45 +425,37 @@
                 const eventStart = new Date(e.isoStart); eventStart.setHours(0,0,0,0);
                 const eventEnd = new Date(e.isoEnd || e.isoStart); eventEnd.setHours(0,0,0,0);
                 
-                // Tage Differenz: (Event - Heute) -> Negativ = Vergangenheit, Positiv = Zukunft
-                // Wir brauchen: (Heute - Event) -> Positiv = Event war schon, Negativ = Event kommt noch
-                // Einfacher: DaysUntil = (Event - Today)
-                
                 const diffMs = eventStart - today;
                 const daysUntil = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-                
-                // Diff for "After" events (based on End date)
                 const diffMsAfter = today - eventEnd;
                 const daysSinceEnd = Math.floor(diffMsAfter / (1000 * 60 * 60 * 24));
 
-                // 1. UvD / KvD / Standort (Ab 1 Tag danach)
-                if ((e.cat === 'UvD' || e.cat === 'KvD' || e.cat === 'UvD Standort') && daysSinceEnd >= 1) {
+                // 1. UvD / KvD (Config: uvd)
+                if (cfg.uvd.active && (e.cat === 'UvD' || e.cat === 'KvD' || e.cat === 'UvD Standort') && daysSinceEnd >= cfg.uvd.days) {
                     activeReminders.push({ id: e.id, text: `Stunden für ${e.cat} am ${e.date} nachtragen?`, icon: "⏰", date: e.date });
                 }
                 
-                // 2. Arzt (Ab 1 Tag danach)
-                if (e.cat === 'Arzttermin' && daysSinceEnd >= 1) {
+                // 2. Arzt (Config: arzt)
+                if (cfg.arzt.active && e.cat === 'Arzttermin' && daysSinceEnd >= cfg.arzt.days) {
                     activeReminders.push({ id: e.id, text: "Beim Arzt gewesen?\nNeuer Termin vereinbart?", icon: "💉", date: e.date });
                 }
 
-                // 3. Urlaub / DA / LZK / Sonder (Ab 14 Tage davor)
-                // Also wenn es noch 14 Tage oder weniger sind (aber noch nicht vorbei)
-                // daysUntil <= 14 UND daysUntil > -1 (Event noch nicht komplett vorbei)
-                if (['Urlaub','DA','Langzeitkonto','Sonderurlaub'].includes(e.cat)) {
-                    if (daysUntil <= 14 && daysUntil > -5) { // Toleranzfenster
+                // 3. Urlaub etc (Config: urlaub) - Davor
+                if (cfg.urlaub.active && ['Urlaub','DA','Langzeitkonto','Sonderurlaub'].includes(e.cat)) {
+                    if (daysUntil <= cfg.urlaub.days && daysUntil > -5) { 
                          activeReminders.push({ id: e.id, text: `Antrag für ${e.cat} geschrieben?`, icon: "📝", date: e.date });
                     }
                 }
 
-                // 4. Stunden genommen (Ab 5 Tage davor)
-                if (e.cat === 'Stunden' && e.mode === 'taken') {
-                    if (daysUntil <= 5 && daysUntil > -2) {
+                // 4. Stunden genommen (Config: stunden) - Davor
+                if (cfg.stunden.active && e.cat === 'Stunden' && e.mode === 'taken') {
+                    if (daysUntil <= cfg.stunden.days && daysUntil > -2) {
                         activeReminders.push({ id: e.id, text: "Stundenabbau beantragt/geschrieben?", icon: "⏳", date: e.date });
                     }
                 }
 
-                // 5. Übungsplatz (Ab 21 Tage danach)
-                if (e.cat === 'Übungsplatz' && daysSinceEnd >= 21) {
+                // 5. Übungsplatz (Config: uebungsplatz) - Danach
+                if (cfg.uebungsplatz.active && (e.cat === 'Übungsplatz' || e.cat === 'Übungsplatz Grün') && daysSinceEnd >= cfg.uebungsplatz.days) {
                     activeReminders.push({ id: e.id, text: "Stunden oder DA dafür erhalten?", icon: "💰", date: e.date });
                 }
             });
@@ -444,7 +488,7 @@
             showNextReminder();
         }
 
-        // --- CORE FUNCTIONS ---
+        // --- SAVE ENTRY ---
         function saveEntry() {
             const cat = 'Stunden'; const mode = 'earned';
             const ds = document.getElementById('date-start-time').value; const de = document.getElementById('date-end-time').value; const note = document.getElementById('inp-note').value;
@@ -505,14 +549,12 @@
                  let bx = document.createElement('div'); bx.className='stat-box'; bx.innerHTML = `<div class="edit-icon">✎</div><h4>${c.n}</h4><span style="color:${d>=0?'#fff':'#ff453a'}">${formatNumber(d)}<span class="unit">${c.u}</span></span>`; bx.onclick = () => adjustStat(c.n, s, c.u); grid.appendChild(bx);
             });
             
-            // NEXT 5
             const today = new Date().toISOString().slice(0,10);
-            const upcoming = entries.filter(e => { ensureIsoDates(e); return e.isoEnd >= today; }).sort((a,b) => a.isoStart.localeCompare(b.isoStart)).slice(0, 5); // 5 ITEMS
+            const upcoming = entries.filter(e => { ensureIsoDates(e); return e.isoEnd >= today; }).sort((a,b) => a.isoStart.localeCompare(b.isoStart)).slice(0, 5); 
             let listHtml = upcoming.length ? '' : '<div style="font-size:11px; color:#666;">Keine Termine</div>';
             upcoming.forEach(u => {
                 let icon = '';
-                if(u.cat === 'Stunden') { icon = (u.mode==='earned')?'➕':'⏰'; } else if(u.icon) icon = u.icon; else icon='•';
-                // NOTE ANZEIGE
+                if(u.cat === 'Stunden') { icon = (u.mode==='earned')?'➕':'⏰'; } else if(u.icon) icon = u.icon; else if(CAT_CONFIG[u.cat]) icon=CAT_CONFIG[u.cat].icon; else icon='•';
                 let noteHtml = u.note ? `<div style="font-size:10px; color:#aaa; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;">${u.note}</div>` : '';
                 listHtml += `<div class="upcoming-item" style="padding:6px 10px; margin-bottom:4px; display:block;"><div style="display:flex; justify-content:space-between; align-items:center;"><span style="display:flex; align-items:center;"><span class="u-icon" style="font-size:12px; width:15px;">${icon}</span><span style="font-size:12px;">${u.cat}</span></span><span style="font-size:11px; color:#888;">${formatDateDE(u.isoStart).slice(0,6)}</span></div>${noteHtml}</div>`;
             });
@@ -559,13 +601,9 @@
                 if(calendarFilter==='all') return true;
                 if(calendarFilter==='StundenTaken') return e.cat === 'Stunden' && e.mode === 'taken';
                 if(calendarFilter==='StundenEarned') return e.cat === 'Stunden' && e.mode === 'earned';
-                // Direkte Übereinstimmung für die spezifischen Kategorien
-                if(['Urlaub','Arzttermin','Ausbildung','Übungsplatz','UvD','UvD Standort','KvD','DA','Langzeitkonto','Sonderurlaub','Kindkrank','Sonstiges'].includes(calendarFilter)) {
+                if(['Urlaub','Arzttermin','Ausbildung','Übungsplatz','Übungsplatz Grün','UvD','UvD Standort','KvD','DA','Langzeitkonto','Sonderurlaub','Kindkrank','Sonstiges'].includes(calendarFilter)) {
                     return e.cat === calendarFilter;
                 }
-                // Fallback (z.B. Dienst)
-                if(calendarFilter==='Dienst') return (e.cat === 'UvD' || e.cat === 'KvD' || e.cat.includes('Standort'));
-                if(calendarFilter==='Termine') return (e.cat === 'Arzttermin' || e.cat === 'Übungsplatz' || e.cat === 'Sonstiges');
                 return true;
             });
         }
@@ -578,7 +616,7 @@
             if(!filtered.length) list.innerHTML = '<div style="text-align:center;padding:20px;color:#666">Keine kommenden Einträge</div>';
             filtered.forEach(e => {
                  if(e.note==="Manuelle Korrektur Statistik") return;
-                 let icon = ''; if(e.cat==='Stunden') icon = e.mode==='earned'?'➕':'⏰'; else icon = e.icon || '•';
+                 let icon = ''; if(e.cat==='Stunden') icon = e.mode==='earned'?'➕':'⏰'; else icon = e.icon || (CAT_CONFIG[e.cat]?CAT_CONFIG[e.cat].icon:'•');
                  let desc = e.cat; let sub = `${e.date} | ${e.timeDesc}`;
                  list.innerHTML += `<div class="list-view-item future"><div class="lv-icon">${icon}</div><div class="lv-info" onclick="jumpToDate('${e.isoStart}')"><div class="lv-title">${desc}</div><div class="lv-meta">${sub}</div></div><button class="h-action-btn" onclick="editEntry(${e.id})">✎</button></div>`;
             });
@@ -643,9 +681,59 @@
             if(id==='view-calendar') setTimeout(()=>{const c=document.getElementById('current-month-card'); if(c) c.scrollIntoView({behavior:"smooth",block:"center"});},100);
         }
         function resetAll() { if(confirm("Reset?")) { localStorage.removeItem('trackData_v5'); entries=[]; updateUI(); } }
-        function openSettings() { document.getElementById('settings-modal').classList.add('open'); const tb=document.getElementById('settings-tbody'); tb.innerHTML=''; [1,2,3,4,5,6,0].forEach(i=>{ let s=settings.schedule[i]; tb.innerHTML+=`<tr><td>${DAY_NAMES[i]}</td><td><input type="time" id="set-s-${i}" value="${s.s}"></td><td><input type="time" id="set-e-${i}" value="${s.e}"></td></tr>`; }); }
-        function saveSettings() { for(let i=0;i<7;i++){ settings.schedule[i]={s:document.getElementById(`set-s-${i}`).value, e:document.getElementById(`set-e-${i}`).value}; } localStorage.setItem('trackSettings_v17', JSON.stringify(settings)); document.getElementById('settings-modal').classList.remove('open'); updateUI(); }
-        function exportData() { const b=new Blob([JSON.stringify({entries,settings})],{type:"application/json"}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download="backup_v45.json"; a.click(); }
+        
+        // --- NEW: OPEN SETTINGS WITH REMINDER CONFIG ---
+        function openSettings() { 
+            document.getElementById('settings-modal').classList.add('open'); 
+            
+            // 1. Reminders Config
+            const rc = document.getElementById('reminders-config-container');
+            rc.innerHTML = '';
+            
+            // Loop through settings.reminders
+            for(const [key, cfg] of Object.entries(settings.reminders)) {
+                let daysVal = cfg.days;
+                let active = cfg.active ? 'checked' : '';
+                
+                let html = `
+                <div class="rem-config-row">
+                    <div class="rem-config-label">${cfg.label}</div>
+                    <div class="rem-config-inputs">
+                        <input type="number" class="rem-days-input" id="rem-days-${key}" value="${daysVal}" min="0">
+                        <span style="font-size:11px;color:#888;">Tage</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="rem-active-${key}" ${active}>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>`;
+                rc.innerHTML += html;
+            }
+
+            // 2. Schedule Config
+            const tb=document.getElementById('settings-tbody'); tb.innerHTML=''; 
+            [1,2,3,4,5,6,0].forEach(i=>{ let s=settings.schedule[i]; tb.innerHTML+=`<tr><td>${DAY_NAMES[i]}</td><td><input type="time" id="set-s-${i}" value="${s.s}"></td><td><input type="time" id="set-e-${i}" value="${s.e}"></td></tr>`; }); 
+        }
+
+        function saveSettings() { 
+            // Save Reminders
+            for(const key of Object.keys(settings.reminders)) {
+                const d = parseInt(document.getElementById(`rem-days-${key}`).value);
+                const a = document.getElementById(`rem-active-${key}`).checked;
+                settings.reminders[key].days = isNaN(d) ? settings.reminders[key].days : d;
+                settings.reminders[key].active = a;
+            }
+
+            // Save Schedule
+            for(let i=0;i<7;i++){ settings.schedule[i]={s:document.getElementById(`set-s-${i}`).value, e:document.getElementById(`set-e-${i}`).value}; } 
+            
+            localStorage.setItem('trackSettings_v17', JSON.stringify(settings)); 
+            document.getElementById('settings-modal').classList.remove('open'); 
+            checkReminders(); // Re-check with new settings
+            updateUI(); 
+        }
+        
+        function exportData() { const b=new Blob([JSON.stringify({entries,settings})],{type:"application/json"}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download="backup_v47.json"; a.click(); }
         function importData(inp) { const r=new FileReader(); r.onload=e=>{ let d=JSON.parse(e.target.result); if(Array.isArray(d)) entries=d; else { entries=d.entries; settings=d.settings; } localStorage.setItem('trackData_v5', JSON.stringify(entries)); updateUI(); }; r.readAsText(inp.files[0]); }
     </script>
 </body>
