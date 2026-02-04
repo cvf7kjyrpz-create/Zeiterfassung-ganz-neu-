@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Arbeitszeit V47">
-    <title>Arbeitszeit Tracker V47</title>
+    <meta name="apple-mobile-web-app-title" content="Arbeitszeit V48">
+    <title>Arbeitszeit Tracker V48</title>
 
     <style>
         :root {
@@ -30,8 +30,30 @@
 
         body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Helvetica, Arial, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; font-size: 14px; }
         
-        header { padding-top: max(10px, env(safe-area-inset-top)); padding-bottom: 10px; background-color: var(--bg); text-align: center; border-bottom: 1px solid var(--card-border); z-index: 100; }
+        /* Header Anpassung für Reset Button rechts */
+        header { 
+            padding-top: max(10px, env(safe-area-inset-top)); 
+            padding-bottom: 10px; 
+            background-color: var(--bg); 
+            border-bottom: 1px solid var(--card-border); 
+            z-index: 100; 
+            position: relative; /* Wichtig für absolute Positionierung */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
         header h1 { margin: 0; font-size: 16px; font-weight: 600; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; }
+        
+        /* Der Mülleimer oben rechts */
+        #header-reset-btn {
+            position: absolute;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            display: none; /* Standardmäßig versteckt */
+        }
 
         main { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 90px; }
 
@@ -137,14 +159,9 @@
 
         .data-tools { margin-top: 10px; padding-top: 15px; border-top: 1px solid var(--card-border); display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         
-        /* SETTINGS BUTTON NEU */
-        .btn-settings-big { 
-            grid-column: span 2; background: #2c2c2e; border: 1px solid #555; color: white; 
-            padding: 15px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; text-align: center;
-        }
+        /* SETTINGS BUTTON ANGEPASST (WIE ANDERE TOOLS) */
         .btn-tool { padding: 10px; background: var(--card); border: 1px solid var(--card-border); color: var(--text); border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
         
-        /* SETTINGS CONTENT STYLE */
         .settings-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
         .settings-table td { padding: 5px; }
         
@@ -153,7 +170,6 @@
         .rem-config-inputs { display: flex; align-items: center; gap: 8px; }
         .rem-days-input { width: 50px; text-align: center; padding: 5px; border-radius: 5px; border: 1px solid #444; background: #1c1c1e; color: white; }
         
-        /* Checkbox Style */
         .toggle-switch { position: relative; display: inline-block; width: 40px; height: 24px; }
         .toggle-switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #444; transition: .4s; border-radius: 24px; }
@@ -169,7 +185,10 @@
 </head>
 <body>
 
-    <header><h1 id="header-title">Buchen</h1></header>
+    <header>
+        <h1 id="header-title">Buchen</h1>
+        <button id="header-reset-btn" onclick="resetAll()">🗑️</button>
+    </header>
 
     <main>
         <div id="view-input" class="view active">
@@ -210,6 +229,7 @@
                          <div class="filter-dropdown-menu" id="filter-menu">
                              <div class="filter-option selected" onclick="applyFilter('all', 'Alle')">Alle</div>
                              <div class="filter-option" onclick="applyFilter('Urlaub', 'Urlaub')">Urlaub</div>
+                             <div class="filter-option" onclick="applyFilter('Kindkonto', 'Kindkonto')">Kindkonto</div>
                              <div class="filter-option" onclick="applyFilter('StundenTaken', 'Stunden (Genommen)')">Stunden (Genommen)</div>
                              <div class="filter-option" onclick="applyFilter('StundenEarned', 'Stunden (Bekommen)')">Stunden (Bekommen)</div>
                              
@@ -242,12 +262,10 @@
         <div id="view-stats" class="view">
             <div class="stats-grid" id="stats-grid"></div>
             <div class="data-tools">
-                <button class="btn-settings-big" onclick="openSettings()">⚙️ Einstellungen / Erinnerungen</button>
-                
+                <button class="btn-tool" onclick="openSettings()">⚙️ Einstellungen</button>
                 <button class="btn-tool" onclick="exportData()">💾 Backup</button>
                 <button class="btn-tool" onclick="document.getElementById('file-upload').click()">📂 Laden</button>
                 <input type="file" id="file-upload" accept=".json" style="display:none" onchange="importData(this)">
-                <button class="btn-tool" style="color:var(--c-krank); border-color:var(--c-krank);" onclick="resetAll()">⚠️ Reset</button>
             </div>
         </div>
     </main>
@@ -290,10 +308,13 @@
                 
                 <div class="cat-btn" data-cat="Arzttermin" onclick="selectModalCat(this, 'Arzttermin', '💉', 'note')"><span class="cat-btn-icon">💉</span>Arzt</div>
                 <div class="cat-btn" data-cat="Stunden" onclick="selectModalCat(this, 'Stunden', '⏰', 'taken')"><span class="cat-btn-icon">⏰</span>Stunden</div>
-                <div class="cat-btn" data-cat="Urlaub" onclick="selectModalCat(this, 'Urlaub', '🌴', 'taken')"><span class="cat-btn-icon">🌴</span>Urlaub</div>
-                <div class="cat-btn" data-cat="DA" onclick="selectModalCat(this, 'DA', '🌴', 'taken')"><span class="cat-btn-icon">🌴</span>DA</div>
-                <div class="cat-btn" data-cat="Langzeitkonto" onclick="selectModalCat(this, 'Langzeitkonto', '🌴', 'taken')"><span class="cat-btn-icon">🌴</span>LZK</div>
-                <div class="cat-btn" data-cat="Sonderurlaub" onclick="selectModalCat(this, 'Sonderurlaub', '🌴', 'taken')"><span class="cat-btn-icon">🌴</span>Sonder</div>
+                
+                <div class="cat-btn" data-cat="Urlaub" onclick="selectModalCat(this, 'Urlaub', '🏖️', 'taken')"><span class="cat-btn-icon">🏖️</span>Urlaub</div>
+                <div class="cat-btn" data-cat="Kindkonto" onclick="selectModalCat(this, 'Kindkonto', '🏖️', 'taken')"><span class="cat-btn-icon">🏖️</span>Kindkto.</div>
+                <div class="cat-btn" data-cat="DA" onclick="selectModalCat(this, 'DA', '🏖️', 'taken')"><span class="cat-btn-icon">🏖️</span>DA</div>
+                <div class="cat-btn" data-cat="Langzeitkonto" onclick="selectModalCat(this, 'Langzeitkonto', '🏖️', 'taken')"><span class="cat-btn-icon">🏖️</span>LZK</div>
+                <div class="cat-btn" data-cat="Sonderurlaub" onclick="selectModalCat(this, 'Sonderurlaub', '🏖️', 'taken')"><span class="cat-btn-icon">🏖️</span>Sonder</div>
+                
                 <div class="cat-btn" data-cat="UvD" onclick="selectModalCat(this, 'UvD', '🏠', 'note')"><span class="cat-btn-icon">🏠</span>UvD</div>
                 <div class="cat-btn" data-cat="UvD Standort" onclick="selectModalCat(this, 'UvD Standort', '🏠', 'note')"><span class="cat-btn-icon">🏠</span>UvD St.</div>
                 <div class="cat-btn" data-cat="KvD" onclick="selectModalCat(this, 'KvD', '🚘', 'note')"><span class="cat-btn-icon">🚘</span>KvD</div>
@@ -327,8 +348,7 @@
             <div class="modal-header"><div class="modal-title">Einstellungen</div><button class="close-btn" onclick="document.getElementById('settings-modal').classList.remove('open')">×</button></div>
             
             <div style="margin-bottom:15px; font-weight:bold; color:var(--accent); font-size:14px;">Erinnerungen konfigurieren</div>
-            <div id="reminders-config-container">
-                </div>
+            <div id="reminders-config-container"></div>
 
             <div style="margin-top:20px; margin-bottom:15px; font-weight:bold; color:var(--accent); font-size:14px; border-top:1px solid #333; padding-top:10px;">Standard Arbeitszeiten</div>
             <table class="settings-table"><thead><tr><th>Tag</th><th>Von</th><th>Bis</th></tr></thead><tbody id="settings-tbody"></tbody></table>
@@ -346,7 +366,6 @@
     <script>
         let entries = JSON.parse(localStorage.getItem('trackData_v5')) || [];
         
-        // STANDARD EINSTELLUNGEN MIT REMINDERS
         const defaultSettings = { 
             schedule: [{s:"00:00",e:"00:00"},{s:"07:00",e:"16:00"},{s:"07:00",e:"16:00"},{s:"07:00",e:"16:00"},{s:"07:00",e:"16:00"},{s:"07:00",e:"13:00"},{s:"00:00",e:"00:00"}],
             reminders: {
@@ -357,10 +376,7 @@
                 uebungsplatz: { active: true, days: 21, label: "Übungsplatz (Danach)" }
             }
         };
-        
-        // Laden oder Defaults nutzen
         let settings = JSON.parse(localStorage.getItem('trackSettings_v17')) || defaultSettings;
-        // Migration: Falls reminders fehlt (bei alten Usern)
         if(!settings.reminders) settings.reminders = defaultSettings.reminders;
 
         let mode = 'taken'; 
@@ -369,17 +385,21 @@
         let modalCurrentIsoDate = null; 
         let currentEditId = null; 
         let activeReminders = []; 
-        
         let modalSelected = { cat: '', icon: '', type: '' };
 
+        // KONFIGURATION: NEUE ICONS
         const CAT_CONFIG = {
             'Arzttermin': { icon: '💉', type: 'note' },
             'Übungsplatz': { icon: '🔧', type: 'note' }, // Blau
-            'Übungsplatz Grün': { icon: '🌳', type: 'note' }, // GRÜN (Laubbaum)
-            'Urlaub': { icon: '🌴', type: 'taken' },
-            'DA': { icon: '🌴', type: 'taken' },
-            'Langzeitkonto': { icon: '🌴', type: 'taken' },
-            'Sonderurlaub': { icon: '🌴', type: 'taken' },
+            'Übungsplatz Grün': { icon: '🌳', type: 'note' }, // Grün
+            
+            // ALLE URLAUBSTYPEN JETZT: 🏖️
+            'Urlaub': { icon: '🏖️', type: 'taken' },
+            'Kindkonto': { icon: '🏖️', type: 'taken' }, // NEU
+            'DA': { icon: '🏖️', type: 'taken' },
+            'Langzeitkonto': { icon: '🏖️', type: 'taken' },
+            'Sonderurlaub': { icon: '🏖️', type: 'taken' },
+            
             'Stunden': { icon: '⏰', type: 'taken' },
             'UvD': { icon: '🏠', type: 'note' },
             'UvD Standort': { icon: '🏠', type: 'note' },
@@ -401,7 +421,6 @@
         function formatDateDE(isoDate) { if(!isoDate) return ""; const parts = isoDate.split('-'); return `${parts[2]}.${parts[1]}.${parts[0]}`; }
         function formatNumber(num) { return Number(num.toFixed(2)).toString(); }
         
-        // --- FILTER MENÜ ---
         function toggleFilterMenu() { document.getElementById('filter-menu').classList.toggle('show'); }
         function applyFilter(f, label) {
             calendarFilter = f;
@@ -411,89 +430,55 @@
             renderCalendar();
         }
 
-        // --- INTELLIGENTE ERINNERUNGEN MIT CONFIG ---
+        // --- REMINDERS ---
         function checkReminders() {
-            const today = new Date();
-            today.setHours(0,0,0,0);
+            const today = new Date(); today.setHours(0,0,0,0);
             activeReminders = [];
-            
-            const cfg = settings.reminders; // Hole Config
+            const cfg = settings.reminders; 
 
             entries.forEach(e => {
                 if(e.reminderDismissed) return;
-
                 const eventStart = new Date(e.isoStart); eventStart.setHours(0,0,0,0);
                 const eventEnd = new Date(e.isoEnd || e.isoStart); eventEnd.setHours(0,0,0,0);
-                
-                const diffMs = eventStart - today;
-                const daysUntil = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-                const diffMsAfter = today - eventEnd;
-                const daysSinceEnd = Math.floor(diffMsAfter / (1000 * 60 * 60 * 24));
+                const diffMs = eventStart - today; const daysUntil = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+                const diffMsAfter = today - eventEnd; const daysSinceEnd = Math.floor(diffMsAfter / (1000 * 60 * 60 * 24));
 
-                // 1. UvD / KvD (Config: uvd)
                 if (cfg.uvd.active && (e.cat === 'UvD' || e.cat === 'KvD' || e.cat === 'UvD Standort') && daysSinceEnd >= cfg.uvd.days) {
                     activeReminders.push({ id: e.id, text: `Stunden für ${e.cat} am ${e.date} nachtragen?`, icon: "⏰", date: e.date });
                 }
-                
-                // 2. Arzt (Config: arzt)
                 if (cfg.arzt.active && e.cat === 'Arzttermin' && daysSinceEnd >= cfg.arzt.days) {
                     activeReminders.push({ id: e.id, text: "Beim Arzt gewesen?\nNeuer Termin vereinbart?", icon: "💉", date: e.date });
                 }
-
-                // 3. Urlaub etc (Config: urlaub) - Davor
-                if (cfg.urlaub.active && ['Urlaub','DA','Langzeitkonto','Sonderurlaub'].includes(e.cat)) {
-                    if (daysUntil <= cfg.urlaub.days && daysUntil > -5) { 
-                         activeReminders.push({ id: e.id, text: `Antrag für ${e.cat} geschrieben?`, icon: "📝", date: e.date });
-                    }
+                if (cfg.urlaub.active && ['Urlaub','DA','Langzeitkonto','Sonderurlaub','Kindkonto'].includes(e.cat)) {
+                    if (daysUntil <= cfg.urlaub.days && daysUntil > -5) { activeReminders.push({ id: e.id, text: `Antrag für ${e.cat} geschrieben?`, icon: "📝", date: e.date }); }
                 }
-
-                // 4. Stunden genommen (Config: stunden) - Davor
                 if (cfg.stunden.active && e.cat === 'Stunden' && e.mode === 'taken') {
-                    if (daysUntil <= cfg.stunden.days && daysUntil > -2) {
-                        activeReminders.push({ id: e.id, text: "Stundenabbau beantragt/geschrieben?", icon: "⏳", date: e.date });
-                    }
+                    if (daysUntil <= cfg.stunden.days && daysUntil > -2) { activeReminders.push({ id: e.id, text: "Stundenabbau beantragt/geschrieben?", icon: "⏳", date: e.date }); }
                 }
-
-                // 5. Übungsplatz (Config: uebungsplatz) - Danach
                 if (cfg.uebungsplatz.active && (e.cat === 'Übungsplatz' || e.cat === 'Übungsplatz Grün') && daysSinceEnd >= cfg.uebungsplatz.days) {
                     activeReminders.push({ id: e.id, text: "Stunden oder DA dafür erhalten?", icon: "💰", date: e.date });
                 }
             });
-
             showNextReminder();
         }
-
         function showNextReminder() {
-            if(activeReminders.length === 0) {
-                document.getElementById('reminder-modal').classList.remove('open');
-                return;
-            }
+            if(activeReminders.length === 0) { document.getElementById('reminder-modal').classList.remove('open'); return; }
             const rem = activeReminders[0];
-            document.getElementById('rem-icon').innerText = rem.icon;
-            document.getElementById('rem-date').innerText = rem.date;
-            document.getElementById('rem-text').innerText = rem.text;
-            document.getElementById('reminder-modal').classList.add('open');
+            document.getElementById('rem-icon').innerText = rem.icon; document.getElementById('rem-date').innerText = rem.date;
+            document.getElementById('rem-text').innerText = rem.text; document.getElementById('reminder-modal').classList.add('open');
         }
-
         function handleReminder(isDone) {
             const current = activeReminders[0];
-            if (isDone) {
-                const idx = entries.findIndex(e => e.id === current.id);
-                if(idx !== -1) {
-                    entries[idx].reminderDismissed = true;
-                    localStorage.setItem('trackData_v5', JSON.stringify(entries));
-                }
-            }
-            activeReminders.shift();
-            showNextReminder();
+            if (isDone) { const idx = entries.findIndex(e => e.id === current.id); if(idx !== -1) { entries[idx].reminderDismissed = true; localStorage.setItem('trackData_v5', JSON.stringify(entries)); } }
+            activeReminders.shift(); showNextReminder();
         }
 
-        // --- SAVE ENTRY ---
+        // --- SAVE/EDIT ---
         function saveEntry() {
             const cat = 'Stunden'; const mode = 'earned';
             const ds = document.getElementById('date-start-time').value; const de = document.getElementById('date-end-time').value; const note = document.getElementById('inp-note').value;
             if(!ds) { alert('Datum fehlt'); return; } if(!de) { document.getElementById('date-end-time').value = ds; }
-            let manualH = document.getElementById('hours-manual-val').value; if(manualH === "") { alert('Bitte Stunden eingeben (oder 0)'); return; }
+            let manualH = document.getElementById('hours-manual-val').value; if(manualH === "") { alert('Bitte Stunden eingeben'); return; }
             let hoursVal = parseFloat(manualH);
             let dispDate = (ds===de || !de) ? formatDateDE(ds) : `${formatDateDE(ds)} - ${formatDateDE(de)}`; 
             let dispTime = `${document.getElementById('time-start').value} - ${document.getElementById('time-end').value}`; 
@@ -502,7 +487,6 @@
             localStorage.setItem('trackData_v5', JSON.stringify(entries)); alert('Gespeichert'); updateUI();
             document.getElementById('hours-manual-val').value = ""; document.getElementById('inp-note').value = "";
         }
-
         function editEntry(id) {
             const e = entries.find(x => x.id === id); if(!e) return;
             if(e.cat === 'Stunden' && e.mode === 'earned') {
@@ -521,8 +505,8 @@
                  let btn = document.querySelector(`.cat-btn[data-cat="${e.cat}"]`); if(btn) btn.click(); currentEditId = id; 
              }, 200);
         }
-
         function deleteEntry(id) { if(confirm("Löschen?")) { entries = entries.filter(e => e.id !== id); localStorage.setItem('trackData_v5', JSON.stringify(entries)); updateUI(); if(document.getElementById('day-modal').classList.contains('open')) { const evs = getEventsForDate(modalCurrentIsoDate); openModal(modalCurrentIsoDate, evs); } } }
+        
         function updateUI() { renderHistory(); renderStats(); renderCalendar(); }
         function ensureIsoDates(e) { if(e.isoStart) return; }
 
@@ -533,7 +517,7 @@
                 let colorClass = ''; let customStyle = '';
                 if(e.cat.startsWith('Urlaub')) colorClass = 'cat-urlaub'; else if(e.cat.startsWith('Stunden')) colorClass = 'cat-stunden'; else if(e.cat.startsWith('Kind')) colorClass = 'cat-krank'; else if(e.cat.startsWith('DA')) colorClass = 'cat-da'; else if(e.cat.startsWith('Lang')) colorClass = 'cat-lzk'; else if(e.cat.startsWith('Sonder')) colorClass = 'cat-sonder'; else customStyle='border-left: 4px solid #555;';
                 let valClass = e.mode === 'taken' ? 'neg' : 'pos'; let sign = e.mode === 'taken' ? '-' : '+'; let displayVal = "";
-                if(e.hours > 0 || (e.hours === 0 && e.cat === 'Stunden')) { if (['Urlaub','Kindkrank','DA','Sonderurlaub'].includes(e.cat)) displayVal = formatNumber(e.hours / 8) + " d"; else displayVal = formatNumber(e.hours) + " h"; } else { displayVal = ""; sign = ""; }
+                if(e.hours > 0 || (e.hours === 0 && e.cat === 'Stunden')) { if (['Urlaub','Kindkrank','DA','Sonderurlaub','Kindkonto'].includes(e.cat)) displayVal = formatNumber(e.hours / 8) + " d"; else displayVal = formatNumber(e.hours) + " h"; } else { displayVal = ""; sign = ""; }
                 let note = e.note ? `<div style="font-size:12px;color:#aaa;font-style:italic;">${e.note}</div>` : '';
                 list.innerHTML += `<div class="history-item ${colorClass}" style="${customStyle}"><div class="h-content"><div class="h-top"><div><div class="h-title">${e.cat}</div><div class="h-meta">${e.date} | ${e.timeDesc}</div>${note}</div><div class="h-val ${valClass}">${sign} ${displayVal}</div></div></div><div class="h-btn-group"><button class="h-action-btn" onclick="editEntry(${e.id})">✎</button><button class="h-action-btn" onclick="deleteEntry(${e.id})" style="color:#FF453A;">🗑️</button></div></div>`;
             });
@@ -542,9 +526,11 @@
         function renderStats() {
             const grid = document.getElementById('stats-grid'); grid.innerHTML = '';
             let tDays = 0, tHours = 0;
-            entries.forEach(e => { let v = (e.mode==='taken') ? -e.hours : e.hours; if(['Urlaub','DA','Sonderurlaub'].includes(e.cat)) tDays += v; else if(['Stunden','Langzeitkonto'].includes(e.cat)) tHours += v; });
+            entries.forEach(e => { let v = (e.mode==='taken') ? -e.hours : e.hours; if(['Urlaub','DA','Sonderurlaub','Kindkonto'].includes(e.cat)) tDays += v; else if(['Stunden','Langzeitkonto'].includes(e.cat)) tHours += v; });
             grid.innerHTML += `<div class="stat-box summary"><div><h4>∑ Tage</h4><span style="color:${tDays>=0?'#fff':'#ff453a'}">${formatNumber(tDays/8)}<span class="unit">Ges</span></span></div><div><h4>∑ Stunden</h4><span style="color:${tHours>=0?'#fff':'#ff453a'}">${formatNumber(tHours)}<span class="unit">Ges</span></span></div></div>`;
-            [{n:'Urlaub',u:'Tage'},{n:'Stunden',u:'Std'},{n:'Kindkrank',u:'Tage'},{n:'DA',u:'Tage'},{n:'Langzeitkonto',u:'Std'},{n:'Sonderurlaub',u:'Tage'}].forEach(c => {
+            
+            // NEU: Kindkonto mit in der Liste
+            [{n:'Urlaub',u:'Tage'},{n:'Stunden',u:'Std'},{n:'Kindkonto',u:'Std'},{n:'Kindkrank',u:'Tage'},{n:'DA',u:'Tage'},{n:'Langzeitkonto',u:'Std'},{n:'Sonderurlaub',u:'Tage'}].forEach(c => {
                  let s = 0; entries.filter(x=>x.cat===c.n).forEach(x => s += (x.mode==='earned'?x.hours:-x.hours)); let d = (c.u==='Tage') ? s/8 : s;
                  let bx = document.createElement('div'); bx.className='stat-box'; bx.innerHTML = `<div class="edit-icon">✎</div><h4>${c.n}</h4><span style="color:${d>=0?'#fff':'#ff453a'}">${formatNumber(d)}<span class="unit">${c.u}</span></span>`; bx.onclick = () => adjustStat(c.n, s, c.u); grid.appendChild(bx);
             });
@@ -601,7 +587,7 @@
                 if(calendarFilter==='all') return true;
                 if(calendarFilter==='StundenTaken') return e.cat === 'Stunden' && e.mode === 'taken';
                 if(calendarFilter==='StundenEarned') return e.cat === 'Stunden' && e.mode === 'earned';
-                if(['Urlaub','Arzttermin','Ausbildung','Übungsplatz','Übungsplatz Grün','UvD','UvD Standort','KvD','DA','Langzeitkonto','Sonderurlaub','Kindkrank','Sonstiges'].includes(calendarFilter)) {
+                if(['Urlaub','Arzttermin','Ausbildung','Übungsplatz','Übungsplatz Grün','UvD','UvD Standort','KvD','DA','Langzeitkonto','Sonderurlaub','Kindkrank','Sonstiges','Kindkonto'].includes(calendarFilter)) {
                     return e.cat === calendarFilter;
                 }
                 return true;
@@ -632,7 +618,7 @@
             events.forEach(e => {
                 let col = '#fff'; let displayIcon = e.icon;
                 if(e.cat === 'Stunden') { if(e.mode === 'earned') displayIcon = '➕'; else displayIcon = '⏰'; col = 'var(--c-stunden)'; }
-                else if(['Urlaub','DA','Kindkrank','Sonderurlaub'].includes(e.cat)) col = 'var(--c-urlaub)';
+                else if(['Urlaub','DA','Kindkrank','Sonderurlaub','Kindkonto'].includes(e.cat)) col = 'var(--c-urlaub)';
                 else if(['Langzeitkonto'].includes(e.cat)) col = 'var(--c-lzk)';
                 body.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px solid #333; padding-bottom:5px;"><div><div style="font-weight:bold; color:${col}; font-size:14px;">${displayIcon} ${e.cat}</div><div style="font-size:12px; color:#aaa">${e.timeDesc}</div>${e.note ? `<div style="font-size:11px;color:#888;font-style:italic;">${e.note}</div>` : ''}</div><div style="display:flex; gap:10px;"><button style="background:none; border:none; font-size:16px; cursor:pointer;" onclick="editEntry(${e.id})">✎</button><button style="background:none; border:none; color:#ff453a; font-size:16px; cursor:pointer;" onclick="deleteEntry(${e.id})">🗑️</button></div></div>`;
             });
@@ -674,66 +660,51 @@
         function closeModalDirect() { document.getElementById('day-modal').classList.remove('open'); }
         function closeModal(e) { if(e.target.id==='day-modal') closeModalDirect(); }
         function jumpToDate(iso) { closeListView({target:{id:'list-view-modal'}}); showView('view-calendar',document.querySelectorAll('.nav-item')[1],'Kalender'); openModal(iso, getEventsForDate(iso)); }
+        
         function showView(id,el,ti) {
             document.querySelectorAll('.view').forEach(v=>v.classList.remove('active')); document.getElementById(id).classList.add('active');
             document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active')); if(el) el.classList.add('active');
             document.getElementById('header-title').innerText = ti;
+            
+            // RESET BTN NUR IN STATISTIK ANZEIGEN
+            const resetBtn = document.getElementById('header-reset-btn');
+            if(id === 'view-stats') {
+                resetBtn.style.display = 'block';
+            } else {
+                resetBtn.style.display = 'none';
+            }
+            
             if(id==='view-calendar') setTimeout(()=>{const c=document.getElementById('current-month-card'); if(c) c.scrollIntoView({behavior:"smooth",block:"center"});},100);
         }
-        function resetAll() { if(confirm("Reset?")) { localStorage.removeItem('trackData_v5'); entries=[]; updateUI(); } }
+        function resetAll() { if(confirm("ALLES LÖSCHEN? Reset?")) { localStorage.removeItem('trackData_v5'); entries=[]; updateUI(); } }
         
-        // --- NEW: OPEN SETTINGS WITH REMINDER CONFIG ---
         function openSettings() { 
             document.getElementById('settings-modal').classList.add('open'); 
-            
-            // 1. Reminders Config
             const rc = document.getElementById('reminders-config-container');
             rc.innerHTML = '';
-            
-            // Loop through settings.reminders
             for(const [key, cfg] of Object.entries(settings.reminders)) {
                 let daysVal = cfg.days;
                 let active = cfg.active ? 'checked' : '';
-                
-                let html = `
-                <div class="rem-config-row">
-                    <div class="rem-config-label">${cfg.label}</div>
-                    <div class="rem-config-inputs">
-                        <input type="number" class="rem-days-input" id="rem-days-${key}" value="${daysVal}" min="0">
-                        <span style="font-size:11px;color:#888;">Tage</span>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="rem-active-${key}" ${active}>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                </div>`;
+                let html = `<div class="rem-config-row"><div class="rem-config-label">${cfg.label}</div><div class="rem-config-inputs"><input type="number" class="rem-days-input" id="rem-days-${key}" value="${daysVal}" min="0"><span style="font-size:11px;color:#888;">Tage</span><label class="toggle-switch"><input type="checkbox" id="rem-active-${key}" ${active}><span class="slider"></span></label></div></div>`;
                 rc.innerHTML += html;
             }
-
-            // 2. Schedule Config
             const tb=document.getElementById('settings-tbody'); tb.innerHTML=''; 
             [1,2,3,4,5,6,0].forEach(i=>{ let s=settings.schedule[i]; tb.innerHTML+=`<tr><td>${DAY_NAMES[i]}</td><td><input type="time" id="set-s-${i}" value="${s.s}"></td><td><input type="time" id="set-e-${i}" value="${s.e}"></td></tr>`; }); 
         }
 
         function saveSettings() { 
-            // Save Reminders
             for(const key of Object.keys(settings.reminders)) {
                 const d = parseInt(document.getElementById(`rem-days-${key}`).value);
                 const a = document.getElementById(`rem-active-${key}`).checked;
                 settings.reminders[key].days = isNaN(d) ? settings.reminders[key].days : d;
                 settings.reminders[key].active = a;
             }
-
-            // Save Schedule
             for(let i=0;i<7;i++){ settings.schedule[i]={s:document.getElementById(`set-s-${i}`).value, e:document.getElementById(`set-e-${i}`).value}; } 
-            
             localStorage.setItem('trackSettings_v17', JSON.stringify(settings)); 
             document.getElementById('settings-modal').classList.remove('open'); 
-            checkReminders(); // Re-check with new settings
-            updateUI(); 
+            checkReminders(); updateUI(); 
         }
-        
-        function exportData() { const b=new Blob([JSON.stringify({entries,settings})],{type:"application/json"}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download="backup_v47.json"; a.click(); }
+        function exportData() { const b=new Blob([JSON.stringify({entries,settings})],{type:"application/json"}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download="backup_v48.json"; a.click(); }
         function importData(inp) { const r=new FileReader(); r.onload=e=>{ let d=JSON.parse(e.target.result); if(Array.isArray(d)) entries=d; else { entries=d.entries; settings=d.settings; } localStorage.setItem('trackData_v5', JSON.stringify(entries)); updateUI(); }; r.readAsText(inp.files[0]); }
     </script>
 </body>
