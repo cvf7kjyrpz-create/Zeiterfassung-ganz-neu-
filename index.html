@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Arbeitszeit V37">
-    <title>Arbeitszeit Tracker V37</title>
+    <meta name="apple-mobile-web-app-title" content="Arbeitszeit V38">
+    <title>Arbeitszeit Tracker V38</title>
 
     <style>
         :root {
@@ -61,7 +61,7 @@
             flex: 1;
             overflow-y: auto;
             padding: 15px;
-            padding-bottom: 90px; /* Platz für Nav */
+            padding-bottom: 90px;
         }
 
         /* --- INPUTS & FORMS --- */
@@ -69,12 +69,14 @@
         .input-col { flex: 1; min-width: 0; }
         label { display: block; color: var(--text-sub); font-size: 11px; margin-bottom: 5px; text-transform: uppercase; }
         
+        /* WICHTIG: Damit Zeit und Datum gleich groß sind */
         input, select, textarea {
             width: 100%;
+            height: 45px; /* Feste Höhe erzwingen */
             background-color: var(--input);
             border: 1px solid var(--card-border);
             color: white;
-            padding: 12px;
+            padding: 10px;
             border-radius: 8px;
             font-size: 16px; 
             box-sizing: border-box;
@@ -85,7 +87,7 @@
         
         .btn { width: 100%; padding: 14px; border-radius: 8px; border: none; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 5px; }
         .btn-primary { background-color: var(--card-border); color: var(--accent); }
-        .btn-list-view { width: 100%; padding: 10px; background: var(--accent); color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; margin-bottom: 10px; cursor: pointer; box-shadow: 0 4px 10px rgba(10, 132, 255, 0.3); }
+        .btn-list-view { width: 100%; padding: 10px; background: var(--accent); color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; margin-bottom: 10px; cursor: pointer; }
 
         /* --- TOGGLES --- */
         .toggle-container { display: flex; background: var(--card); border-radius: 8px; padding: 2px; margin-bottom: 15px; border: 1px solid var(--card-border); }
@@ -94,8 +96,8 @@
 
         .hidden { display: none !important; }
 
-        /* --- LISTS (History & Modal List) --- */
-        .history-item, .list-view-item {
+        /* --- LISTS --- */
+        .history-item, .list-view-item, .upcoming-item {
             background-color: var(--card); 
             padding: 12px 14px; 
             border-radius: 8px; 
@@ -108,7 +110,7 @@
         }
         .cat-urlaub { border-left-color: var(--c-urlaub); }
         .cat-stunden { border-left-color: var(--c-stunden); }
-        .cat-krank { border-left-color: var(--c-krank); }
+        .cat-kindkrank { border-left-color: var(--c-krank); }
         .cat-da { border-left-color: var(--c-da); }
         .cat-lzk { border-left-color: var(--c-lzk); }
         .cat-sonder { border-left-color: var(--c-sonder); }
@@ -116,18 +118,12 @@
         .h-content, .lv-info { flex: 1; min-width: 0; }
         .h-top { display: flex; justify-content: space-between; align-items: flex-start; }
         .h-title, .lv-title { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .h-meta, .lv-meta { font-size: 12px; color: var(--text-sub); margin-top: 2px;}
+        .h-meta, .lv-meta, .u-meta { font-size: 12px; color: var(--text-sub); margin-top: 2px;}
         .h-val { font-size: 15px; font-weight: 700; text-align: right; margin-right: 10px; white-space: nowrap;}
         .h-val.neg { color: #ff453a; }
         .h-val.pos { color: #30d158; }
-        
         .h-btn-group { display: flex; gap: 10px; align-items: center; z-index: 10; position: relative; }
-        .h-action-btn { 
-            background: #2c2c2e; border: 1px solid #444; color: white; 
-            width: 30px; height: 30px; border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; 
-            font-size: 14px; cursor: pointer; 
-        }
+        .h-action-btn { background: #2c2c2e; border: 1px solid #444; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; }
 
         /* --- STATS GRID --- */
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -137,18 +133,15 @@
         .unit { font-size: 10px; color: var(--text-sub); font-weight: 400; margin-left: 2px; }
         .edit-icon { position: absolute; top: 6px; right: 6px; font-size: 12px; opacity: 0.5; }
         .stat-box.summary { border-color: #555; background: #2c2c2e; cursor: default; }
+        .stat-box.full-width { grid-column: span 2; cursor: default; }
 
-        /* --- CALENDAR FIXED LAYOUT --- */
+        /* --- CALENDAR --- */
         #cal-sticky-header { position: sticky; top: -15px; background-color: var(--bg); z-index: 50; padding-top: 15px; padding-bottom: 5px; margin-bottom: 10px; border-bottom: 1px solid var(--card-border); }
         .year-selector { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 18px; font-weight: bold; }
         .year-btn { background: none; border: none; color: var(--accent); font-size: 24px; cursor: pointer; padding: 0 20px; }
         
         .cal-filter-container { display: flex; gap: 5px; margin-bottom: 10px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
-        .cal-filter-container::-webkit-scrollbar { display: none; }
-        .cal-filter-btn { 
-            flex: 0 0 auto; padding: 6px 10px; background-color: var(--card); border: 1px solid var(--card-border); 
-            border-radius: 15px; font-size: 11px; color: var(--text-sub); cursor: pointer; 
-        }
+        .cal-filter-btn { flex: 0 0 auto; padding: 6px 10px; background-color: var(--card); border: 1px solid var(--card-border); border-radius: 15px; font-size: 11px; color: var(--text-sub); cursor: pointer; }
         .cal-filter-btn.active { background-color: var(--accent); color: white; border-color: var(--accent); }
 
         .calendar-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
@@ -156,90 +149,50 @@
         
         .month-card { background-color: var(--card); padding: 5px; border-radius: 8px; border: 1px solid var(--card-border); scroll-margin-top: 150px; }
         .month-name { text-align: center; font-weight: 700; margin: 8px 0; color: var(--text-sub); text-transform: uppercase; font-size: 13px; }
-        
         .days-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; }
         .day-label { font-size: 9px; color: #555; padding-bottom: 5px; }
-        
-        /* Die Zelle ist jetzt fixiert und wächst nicht */
         .day-cell { 
-            aspect-ratio: 1; 
-            display: flex; flex-direction: column; justify-content: space-between; align-items: center; 
-            font-size: 12px; border-radius: 4px; position: relative; cursor: pointer; 
-            background: rgba(255,255,255,0.03);
-            overflow: hidden; /* Wichtig: Verhindert Rausragen */
-            padding: 2px 0;
+            aspect-ratio: 1; display: flex; flex-direction: column; justify-content: space-between; align-items: center; 
+            font-size: 12px; border-radius: 4px; position: relative; cursor: pointer; background: rgba(255,255,255,0.03); overflow: hidden; padding: 2px 0;
         }
         .day-cell.empty { background: none; pointer-events: none; }
         
-        /* Container für Icons unten in der Zelle */
-        .event-dots { 
-            display: flex; 
-            justify-content: center; 
-            align-items: center;
-            flex-wrap: wrap; 
-            gap: 1px;
-            width: 100%;
-            height: 40%; /* Reservierter Platz unten */
-            align-content: flex-end;
-            padding-bottom: 2px;
-        }
-        .event-icon { font-size: 9px; line-height: 1; }
+        .event-dots { display: flex; justify-content: center; align-items: flex-end; flex-wrap: wrap; gap: 1px; width: 100%; height: 50%; padding-bottom: 2px; }
+        .event-icon { font-size: 9px; line-height: 1; text-shadow: 0 0 2px black;}
         .event-dot { width: 5px; height: 5px; border-radius: 50%; background-color: #555; }
 
-        /* --- MODAL DESIGN --- */
+        /* --- MODAL --- */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 1000; display: none; justify-content: center; align-items: center; }
         .modal-overlay.open { display: flex; }
-        .modal-content { 
-            background: #1c1c1e; width: 90%; max-width: 380px; 
-            padding: 20px; border-radius: 18px; 
-            border: 1px solid #333; 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6); 
-            max-height: 85vh; overflow-y: auto; 
-        }
+        .modal-content { background: #1c1c1e; width: 90%; max-width: 380px; padding: 20px; border-radius: 18px; border: 1px solid #333; box-shadow: 0 20px 40px rgba(0,0,0,0.6); max-height: 85vh; overflow-y: auto; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #333; }
         .modal-title { font-size: 17px; font-weight: 700; }
         .close-btn { background: none; border: none; font-size: 28px; color: #888; cursor: pointer; line-height: 1; }
         
-        /* NEUES BUTTON GRID IM MODAL - Minimalistisch */
-        .category-grid { 
-            display: grid; 
-            grid-template-columns: repeat(3, 1fr); /* 3 Spalten */
-            gap: 8px; 
-            margin-bottom: 20px; 
-        }
-        .cat-btn { 
-            background: #2c2c2e; 
-            border: 1px solid transparent; 
-            color: #ddd; 
-            padding: 12px 5px; 
-            border-radius: 10px; 
-            font-size: 10px; 
-            text-align: center; 
-            cursor: pointer; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            gap: 6px; 
-            transition: all 0.15s;
-        }
+        .category-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 20px; }
+        .cat-btn { background: #2c2c2e; border: 1px solid transparent; color: #ddd; padding: 12px 5px; border-radius: 10px; font-size: 10px; text-align: center; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: all 0.15s; }
         .cat-btn:active { transform: scale(0.95); background: #3a3a3c; }
-        .cat-btn.active { background: #3a3a3c; border-color: var(--accent); color: white; box-shadow: 0 0 8px rgba(10,132,255,0.2); }
+        /* Hier die blaue Umrandung */
+        .cat-btn.active { background: #3a3a3c; border: 2px solid var(--accent); color: white; box-shadow: 0 0 8px rgba(10,132,255,0.4); }
         .cat-btn-icon { font-size: 20px; margin-bottom: 2px; }
 
-        /* Listen im Modal */
-        .lv-icon { font-size: 18px; width: 25px; text-align: center; }
-
+        .lv-icon, .u-icon { font-size: 18px; width: 25px; text-align: center; margin-right: 10px; }
         .settings-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
         .settings-table td { padding: 5px; }
         
-        .data-tools { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--card-border); display: flex; gap: 10px; flex-wrap: wrap; }
+        /* Die 4 schönen Buttons in der Statistik */
+        .data-tools { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--card-border); display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .btn-tool { 
+            padding: 12px; background: var(--card); border: 1px solid var(--card-border); color: var(--text); 
+            border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; 
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .btn-tool:active { background: #333; }
 
-        /* NAVIGATION */
         nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.95); border-top: 1px solid #333; display: flex; height: 50px; padding-bottom: env(safe-area-inset-bottom); z-index: 500; }
         .nav-item { flex: 1; display: flex; justify-content: center; align-items: center; color: #666; font-size: 22px; transition: color 0.2s; }
         .nav-item.active { color: var(--accent); }
-        .view { display: none; } .view.active { display: block; animation: fadeIn 0.2s; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .view { display: none; } .view.active { display: block; }
     </style>
 </head>
 <body>
@@ -302,9 +255,10 @@
                 
                 <div class="cal-filter-container">
                     <div class="cal-filter-btn active" onclick="setCalFilter('all', this)">Alle</div>
-                    <div class="cal-filter-btn" onclick="setCalFilter('taken', this)">Genommen</div>
-                    <div class="cal-filter-btn" onclick="setCalFilter('earned', this)">Erhalten</div>
-                    <div class="cal-filter-btn" onclick="setCalFilter('note', this)">Infos</div>
+                    <div class="cal-filter-btn" onclick="setCalFilter('Urlaub', this)">Urlaub</div>
+                    <div class="cal-filter-btn" onclick="setCalFilter('Stunden', this)">Stunden</div>
+                    <div class="cal-filter-btn" onclick="setCalFilter('Dienst', this)">Dienst</div>
+                    <div class="cal-filter-btn" onclick="setCalFilter('Termine', this)">Termine</div>
                 </div>
 
                 <button class="btn-list-view" onclick="openListModal()">📋 Liste (Kommende)</button>
@@ -320,12 +274,13 @@
 
         <div id="view-stats" class="view">
             <div class="stats-grid" id="stats-grid"></div>
+            
             <div class="data-tools">
-                <button class="btn-small" onclick="openSettings()">⚙️ Zeiten</button>
-                <button class="btn-small" onclick="exportData()">💾 Backup</button>
-                <button class="btn-small" onclick="document.getElementById('file-upload').click()">📂 Laden</button>
+                <button class="btn-tool" onclick="openSettings()">⚙️ Zeiten</button>
+                <button class="btn-tool" onclick="exportData()">💾 Backup</button>
+                <button class="btn-tool" onclick="document.getElementById('file-upload').click()">📂 Laden</button>
                 <input type="file" id="file-upload" accept=".json" style="display:none" onchange="importData(this)">
-                <button class="btn-small" style="color:var(--c-krank); border-color:var(--c-krank);" onclick="resetAll()">⚠️ Reset</button>
+                <button class="btn-tool" style="color:var(--c-krank); border-color:var(--c-krank);" onclick="resetAll()">⚠️ Reset</button>
             </div>
         </div>
     </main>
@@ -349,23 +304,23 @@
             <div class="modal-add-title" style="margin-bottom:10px;">Neuer Eintrag</div>
             
             <div class="category-grid">
-                <div class="cat-btn" onclick="selectModalCat('Arzttermin', '💉', 'note')"><span class="cat-btn-icon">💉</span>Arzt</div>
-                <div class="cat-btn" onclick="selectModalCat('Übungsplatz', '🔧', 'note')"><span class="cat-btn-icon">🔧</span>Übungspl.</div>
-                <div class="cat-btn" onclick="selectModalCat('Stunden', '⏰', 'taken')"><span class="cat-btn-icon">⏰</span>Stunden</div>
+                <div class="cat-btn" data-cat="Arzttermin" onclick="selectModalCat(this, 'Arzttermin', '💉', 'note')"><span class="cat-btn-icon">💉</span>Arzt</div>
+                <div class="cat-btn" data-cat="Übungsplatz" onclick="selectModalCat(this, 'Übungsplatz', '🔧', 'note')"><span class="cat-btn-icon">🔧</span>Übungspl.</div>
+                <div class="cat-btn" data-cat="Stunden" onclick="selectModalCat(this, 'Stunden', '⏰', 'taken')"><span class="cat-btn-icon">⏰</span>Stunden</div>
                 
-                <div class="cat-btn" onclick="selectModalCat('Urlaub', '🌴', 'taken')"><span class="cat-btn-icon">🌴</span>Urlaub</div>
-                <div class="cat-btn" onclick="selectModalCat('DA', '🌴', 'taken')"><span class="cat-btn-icon">🌴</span>DA</div>
-                <div class="cat-btn" onclick="selectModalCat('Langzeitkonto', '🌴', 'taken')"><span class="cat-btn-icon">🌴</span>LZK</div>
+                <div class="cat-btn" data-cat="Urlaub" onclick="selectModalCat(this, 'Urlaub', '🌴', 'taken')"><span class="cat-btn-icon">🌴</span>Urlaub</div>
+                <div class="cat-btn" data-cat="DA" onclick="selectModalCat(this, 'DA', '🌴', 'taken')"><span class="cat-btn-icon">🌴</span>DA</div>
+                <div class="cat-btn" data-cat="Langzeitkonto" onclick="selectModalCat(this, 'Langzeitkonto', '🌴', 'taken')"><span class="cat-btn-icon">🌴</span>LZK</div>
                 
-                <div class="cat-btn" onclick="selectModalCat('Sonderurlaub', '🌴', 'taken')"><span class="cat-btn-icon">🌴</span>Sonder</div>
-                <div class="cat-btn" onclick="selectModalCat('UvD', '🏠', 'note')"><span class="cat-btn-icon">🏠</span>UvD</div>
-                <div class="cat-btn" onclick="selectModalCat('UvD Standort', '🏠', 'note')"><span class="cat-btn-icon">🏠</span>UvD St.</div>
+                <div class="cat-btn" data-cat="Sonderurlaub" onclick="selectModalCat(this, 'Sonderurlaub', '🌴', 'taken')"><span class="cat-btn-icon">🌴</span>Sonder</div>
+                <div class="cat-btn" data-cat="UvD" onclick="selectModalCat(this, 'UvD', '🏠', 'note')"><span class="cat-btn-icon">🏠</span>UvD</div>
+                <div class="cat-btn" data-cat="UvD Standort" onclick="selectModalCat(this, 'UvD Standort', '🏠', 'note')"><span class="cat-btn-icon">🏠</span>UvD St.</div>
                 
-                <div class="cat-btn" onclick="selectModalCat('KvD', '🚘', 'note')"><span class="cat-btn-icon">🚘</span>KvD</div>
-                <div class="cat-btn" onclick="selectModalCat('Ausbildung', '📚', 'note')"><span class="cat-btn-icon">📚</span>Ausbildung</div>
-                <div class="cat-btn" onclick="selectModalCat('Kindkrank', '🌡️', 'taken')"><span class="cat-btn-icon">🌡️</span>Kindkrank</div>
+                <div class="cat-btn" data-cat="KvD" onclick="selectModalCat(this, 'KvD', '🚘', 'note')"><span class="cat-btn-icon">🚘</span>KvD</div>
+                <div class="cat-btn" data-cat="Ausbildung" onclick="selectModalCat(this, 'Ausbildung', '📚', 'note')"><span class="cat-btn-icon">📚</span>Ausbildung</div>
+                <div class="cat-btn" data-cat="Kindkrank" onclick="selectModalCat(this, 'Kindkrank', '🌡️', 'taken')"><span class="cat-btn-icon">🌡️</span>Kindkrank</div>
                 
-                <div class="cat-btn" onclick="selectModalCat('Sonstiges', '📌', 'note')"><span class="cat-btn-icon">📌</span>Sonstiges</div>
+                <div class="cat-btn" data-cat="Sonstiges" onclick="selectModalCat(this, 'Sonstiges', '📌', 'note')"><span class="cat-btn-icon">📌</span>Sonstiges</div>
             </div>
 
             <div id="modal-selection-display" style="text-align:center; font-size:12px; color:var(--accent); margin-bottom:10px; font-weight:bold;">Wähle eine Kategorie...</div>
@@ -403,13 +358,13 @@
         let settings = JSON.parse(localStorage.getItem('trackSettings_v17')) || { schedule: [{s:"00:00",e:"00:00"},{s:"07:00",e:"16:00"},{s:"07:00",e:"16:00"},{s:"07:00",e:"16:00"},{s:"07:00",e:"16:00"},{s:"07:00",e:"13:00"},{s:"00:00",e:"00:00"}] };
         let mode = 'taken'; 
         let currentCalYear = new Date().getFullYear(); 
-        let calendarFilter = 'all'; // Filter Status
+        let calendarFilter = 'all'; 
         let modalCurrentIsoDate = null; 
         let currentEditId = null; 
         
         let modalSelected = { cat: '', icon: '', type: '' };
 
-        // KONFIGURATION DER KATEGORIEN
+        // KONFIGURATION (Fallback)
         const CAT_CONFIG = {
             'Arzttermin': { icon: '💉', type: 'note' },
             'Übungsplatz': { icon: '🔧', type: 'note' },
@@ -455,7 +410,6 @@
         function calcDaysDiff() { const d1 = new Date(document.getElementById('date-start').value); const d2 = new Date(document.getElementById('date-end').value); let count = 0, curr = new Date(d1); while (curr <= d2) { if (curr.getDay() !== 0 && curr.getDay() !== 6) count++; curr.setDate(curr.getDate() + 1); } document.getElementById('calc-days-val').value = count; }
 
         function saveEntry() {
-            // Speichern für die Hauptseite (Statistik-Einträge)
             const cat = document.getElementById('inp-cat').value; const note = document.getElementById('inp-note').value;
             let hoursVal = 0, dispDate = "", dispTime = "", isoS = "", isoE = "";
             if (!document.getElementById('section-manual').classList.contains('hidden')) {
@@ -473,11 +427,7 @@
             }
             if(currentEditId) { entries = entries.filter(e => e.id !== currentEditId); currentEditId = null; document.getElementById('btn-save-main').innerText = "Buchen"; document.getElementById('edit-mode-hint').style.display = 'none'; }
             
-            // Icon zuweisen
-            let icon = ''; 
-            if(CAT_CONFIG[cat]) icon = CAT_CONFIG[cat].icon; 
-            else if(cat === 'Stunden') icon = '⏰'; 
-            
+            let icon = CAT_CONFIG[cat] ? CAT_CONFIG[cat].icon : (cat==='Stunden'?'⏰':'•');
             entries.unshift({ id: Date.now(), cat: cat, date: dispDate, isoStart: isoS, isoEnd: isoE, timeDesc: dispTime, hours: hoursVal, mode: mode, note: note, color: null, icon: icon });
             localStorage.setItem('trackData_v5', JSON.stringify(entries)); alert('Gespeichert'); updateUI();
         }
@@ -485,13 +435,10 @@
         // --- BEARBEITEN ---
         function editEntry(id) {
             const e = entries.find(x => x.id === id); if(!e) return;
-            // Prüfung: Ist es eine Kalender-Kategorie?
-            if(CAT_CONFIG[e.cat]) {
+            if(CAT_CONFIG[e.cat] || e.cat === 'Stunden') {
                  closeListView({target:{id:'list-view-modal'}}); 
                  showView('view-calendar', document.querySelectorAll('.nav-item')[1], 'Kalender');
                  modalCurrentIsoDate = e.isoStart; 
-                 
-                 // Modal öffnen & füllen
                  openModal(e.isoStart, getEventsForDate(e.isoStart));
                  setTimeout(() => {
                      document.getElementById('modal-date-start').value = e.isoStart; 
@@ -499,17 +446,16 @@
                      const times = e.timeDesc.match(/(\d{2}:\d{2})/g); 
                      if(times && times.length >= 1) document.getElementById('modal-time-start').value = times[0]; 
                      if(times && times.length >= 2) document.getElementById('modal-time-end').value = times[1];
-                     
-                     selectModalCat(e.cat, CAT_CONFIG[e.cat].icon, CAT_CONFIG[e.cat].type);
-                     currentEditId = id; // WICHTIG: Setzen für Update
+                     // Simuliere Klick auf Button mit entsprechendem data-cat
+                     let btn = document.querySelector(`.cat-btn[data-cat="${e.cat}"]`);
+                     if(btn) btn.click();
+                     currentEditId = id; 
                  }, 200);
                  return;
             }
-            // Standard Bearbeitung
             showView('view-input', document.querySelectorAll('.nav-item')[0], 'Eintrag bearbeiten');
             document.getElementById('inp-cat').value = e.cat; document.getElementById('inp-note').value = e.note || "";
             if(e.mode === 'taken' || e.mode === 'earned') setMode(e.mode); updateForm();
-            // Datum füllen je nach Typ (vereinfacht)
             if(['Urlaub','Kindkrank','DA','Sonderurlaub'].includes(e.cat) && e.mode === 'taken') {
                 document.getElementById('date-start').value = e.isoStart; document.getElementById('date-end').value = e.isoEnd; calcDaysDiff();
             } else {
@@ -525,7 +471,6 @@
                 updateUI(); 
                 if(document.getElementById('day-modal').classList.contains('open')) { 
                     const evs = getEventsForDate(modalCurrentIsoDate); 
-                    // Wenn leer nach löschen, Modal offen lassen aber leer anzeigen
                     openModal(modalCurrentIsoDate, evs); 
                 } 
             } 
@@ -540,12 +485,10 @@
             entries.forEach(e => {
                 let colorClass = ''; let customStyle = '';
                 if(e.cat.startsWith('Urlaub')) colorClass = 'cat-urlaub'; else if(e.cat.startsWith('Stunden')) colorClass = 'cat-stunden'; else if(e.cat.startsWith('Kind')) colorClass = 'cat-krank'; else if(e.cat.startsWith('DA')) colorClass = 'cat-da'; else if(e.cat.startsWith('Lang')) colorClass = 'cat-lzk'; else if(e.cat.startsWith('Sonder')) colorClass = 'cat-sonder'; else customStyle='border-left: 4px solid #555;';
-                
                 let valClass = e.mode === 'taken' ? 'neg' : 'pos'; let sign = e.mode === 'taken' ? '-' : '+'; let displayVal = "";
                 if(e.hours > 0) {
                      if (['Urlaub','Kindkrank','DA','Sonderurlaub'].includes(e.cat)) displayVal = formatNumber(e.hours / 8) + " d"; else displayVal = formatNumber(e.hours) + " h";
                 } else { displayVal = ""; sign = ""; }
-
                 let desc = e.cat; 
                 list.innerHTML += `<div class="history-item ${colorClass}" style="${customStyle}"><div class="h-content"><div class="h-top"><div><div class="h-title">${desc}</div><div class="h-meta">${e.date} | ${e.timeDesc}</div></div><div class="h-val ${valClass}">${sign} ${displayVal}</div></div></div><div class="h-btn-group"><button class="h-action-btn" onclick="editEntry(${e.id})">✎</button><button class="h-action-btn" onclick="deleteEntry(${e.id})" style="color:#FF453A;">🗑️</button></div></div>`;
             });
@@ -553,6 +496,17 @@
         
         function renderStats() {
             const grid = document.getElementById('stats-grid'); grid.innerHTML = '';
+            
+            // WIEDER DA: KOMMENDE TERMINE OBEN
+            const today = new Date().toISOString().slice(0,10);
+            const upcoming = entries.filter(e => { ensureIsoDates(e); return e.isoEnd >= today; }).sort((a,b) => a.isoStart.localeCompare(b.isoStart)).slice(0, 3);
+            let listHtml = upcoming.length ? '' : '<li class="upcoming-item" style="color:#666; justify-content:center;">Keine Termine</li>';
+            upcoming.forEach(u => {
+                let icon = u.icon || '•';
+                listHtml += `<li class="upcoming-item" onclick="jumpToDate('${u.isoStart}')"><div style="display:flex;align-items:center;"><span class="u-icon">${icon}</span><span style="font-weight:bold;">${u.cat}</span></div><span class="u-meta">${formatDateDE(u.isoStart).slice(0,6)}</span></li>`;
+            });
+            let upBox = document.createElement('div'); upBox.className = 'stat-box full-width'; upBox.innerHTML = `<h4>Nächste Termine</h4><ul class="upcoming-list" style="margin:0;padding:0;">${listHtml}</ul>`; grid.appendChild(upBox);
+
             let tDays = 0, tHours = 0;
             entries.forEach(e => { let v = (e.mode==='taken') ? -e.hours : e.hours; if(['Urlaub','DA','Sonderurlaub'].includes(e.cat)) tDays += v; else if(['Stunden','Langzeitkonto'].includes(e.cat)) tHours += v; });
             grid.innerHTML += `<div class="stat-box summary"><h4>∑ Tage</h4><span style="color:${tDays>=0?'#fff':'#ff453a'}">${formatNumber(tDays/8)}<span class="unit">Ges</span></span></div><div class="stat-box summary"><h4>∑ Stunden</h4><span style="color:${tHours>=0?'#fff':'#ff453a'}">${formatNumber(tHours)}<span class="unit">Ges</span></span></div>`;
@@ -568,7 +522,7 @@
              localStorage.setItem('trackData_v5', JSON.stringify(entries)); updateUI();
         }
 
-        // --- KALENDER RENDER ---
+        // --- KALENDER RENDER (FIXED) ---
         function renderCalendar() {
             document.getElementById('calendar-year-display').innerText = currentCalYear; 
             const root = document.getElementById('calendar-root'); root.innerHTML = ''; 
@@ -591,12 +545,14 @@
                     if(evs.length) cell.classList.add('has-event');
                     
                     let dots = '';
-                    // Begrenzung der Icons, damit der Kalender nicht platzt
-                    let limit = 4; // Max Icons pro Zelle
+                    let limit = 4; // Max Icons
                     let showEvs = evs.slice(0, limit);
                     
                     showEvs.forEach(e => {
-                        let icon = e.icon || CAT_CONFIG[e.cat]?.icon;
+                        // EXPLICIT ICON CHECK
+                        let icon = e.icon; 
+                        if(!icon && CAT_CONFIG[e.cat]) icon = CAT_CONFIG[e.cat].icon;
+                        
                         if(icon) dots += `<span class="event-icon">${icon}</span>`;
                         else { 
                              let c = '#555'; if(e.cat === 'Stunden') c = 'var(--c-stunden)';
@@ -624,16 +580,17 @@
         function getEventsForDate(iso) {
             return entries.filter(e => {
                 ensureIsoDates(e); if(!e.isoStart) return false;
-                // Einfache Logik: Ist der Tag im Zeitraum?
                 let inRange = (iso >= e.isoStart && iso <= e.isoEnd);
                 if(!inRange) return false;
 
-                // Filter Logik
                 if(calendarFilter==='all') return true;
-                if(calendarFilter==='taken') return e.mode==='taken';
-                if(calendarFilter==='earned') return e.mode==='earned';
-                if(calendarFilter==='note') return e.mode==='note';
-                return false;
+                // Spezifische Filter
+                if(calendarFilter==='Urlaub') return e.cat.includes('Urlaub');
+                if(calendarFilter==='Stunden') return e.cat.includes('Stunden');
+                if(calendarFilter==='Dienst') return (e.cat === 'UvD' || e.cat === 'KvD' || e.cat.includes('Standort'));
+                if(calendarFilter==='Termine') return (e.cat === 'Arzttermin' || e.cat === 'Übungsplatz' || e.cat === 'Sonstiges');
+                
+                return true;
             });
         }
         function getTimeFromEntry(e) { let m = e.timeDesc.match(/(\d{2}:\d{2})/); return m ? m[1] : "00:00"; }
@@ -642,11 +599,8 @@
             const list = document.getElementById('list-view-body'); list.innerHTML = '';
             const today = new Date().toISOString().slice(0,10);
             
-            // FILTER: Nur Zukunft (isoEnd >= heute)
-            const filtered = entries.filter(e => { 
-                ensureIsoDates(e); 
-                return e.isoEnd >= today; 
-            }).sort((a,b) => a.isoStart.localeCompare(b.isoStart));
+            // FILTER: Nur Zukunft
+            const filtered = entries.filter(e => { ensureIsoDates(e); return e.isoEnd >= today; }).sort((a,b) => a.isoStart.localeCompare(b.isoStart));
             
             if(!filtered.length) list.innerHTML = '<div style="text-align:center;padding:20px;color:#666">Keine kommenden Einträge</div>';
             
@@ -686,29 +640,22 @@
                     </div>`;
             });
 
-            // Reset Inputs
             document.getElementById('modal-date-start').value = iso; document.getElementById('modal-date-end').value = iso;
             document.getElementById('modal-time-start').value = ""; document.getElementById('modal-time-end').value = ""; 
             
-            // Reset Grid Selection
             document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('modal-selection-display').innerText = "Kategorie wählen...";
+            document.getElementById('modal-selection-display').innerText = "Wähle eine Kategorie...";
             modalSelected = { cat: '', icon: '', type: '' };
             
             document.getElementById('day-modal').classList.add('open');
         }
 
-        function selectModalCat(cat, icon, type) {
+        function selectModalCat(btn, cat, icon, type) {
             modalSelected = { cat, icon, type };
-            // Buttons reset
+            // ID basierte aktive Klasse
             document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-            // Highlight clicked
-            const btns = document.querySelectorAll('.cat-btn');
-            for(let btn of btns) { 
-                if(btn.innerText.includes(cat)) { 
-                    btn.classList.add('active'); 
-                }
-            }
+            btn.classList.add('active');
+            
             document.getElementById('modal-selection-display').innerText = cat;
         }
 
@@ -723,7 +670,6 @@
             if (ds !== de) td += (td ? " " : "") + `(bis ${formatDateDE(de)})`;
             if(!td) td = "Ganztägig";
 
-            // Stunden Berechnung (grob)
             let hours = 0;
             if(modalSelected.type === 'taken') {
                 let count = 0, curr = new Date(ds), end = new Date(de);
@@ -732,9 +678,7 @@
                         let s = ts.split(':').map(Number); let e = te.split(':').map(Number);
                         let diff = (e[0]*60 + e[1]) - (s[0]*60 + s[1]);
                         hours = diff / 60;
-                } else {
-                    hours = count * 8; 
-                }
+                } else { hours = count * 8; }
             }
 
             if(currentEditId) { entries = entries.filter(e => e.id !== currentEditId); currentEditId = null; }
@@ -753,7 +697,6 @@
             });
             localStorage.setItem('trackData_v5', JSON.stringify(entries)); 
             
-            // Modal aktualisieren, aber offen lassen
             openModal(modalCurrentIsoDate, getEventsForDate(modalCurrentIsoDate)); 
             updateUI();
         }
@@ -770,7 +713,7 @@
         function resetAll() { if(confirm("Reset?")) { localStorage.removeItem('trackData_v5'); entries=[]; updateUI(); } }
         function openSettings() { document.getElementById('settings-modal').classList.add('open'); const tb=document.getElementById('settings-tbody'); tb.innerHTML=''; [1,2,3,4,5,6,0].forEach(i=>{ let s=settings.schedule[i]; tb.innerHTML+=`<tr><td>${DAY_NAMES[i]}</td><td><input type="time" id="set-s-${i}" value="${s.s}"></td><td><input type="time" id="set-e-${i}" value="${s.e}"></td></tr>`; }); }
         function saveSettings() { for(let i=0;i<7;i++){ settings.schedule[i]={s:document.getElementById(`set-s-${i}`).value, e:document.getElementById(`set-e-${i}`).value}; } localStorage.setItem('trackSettings_v17', JSON.stringify(settings)); document.getElementById('settings-modal').classList.remove('open'); updateUI(); }
-        function exportData() { const b=new Blob([JSON.stringify({entries,settings})],{type:"application/json"}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download="backup_v37.json"; a.click(); }
+        function exportData() { const b=new Blob([JSON.stringify({entries,settings})],{type:"application/json"}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download="backup_v38.json"; a.click(); }
         function importData(inp) { const r=new FileReader(); r.onload=e=>{ let d=JSON.parse(e.target.result); if(Array.isArray(d)) entries=d; else { entries=d.entries; settings=d.settings; } localStorage.setItem('trackData_v5', JSON.stringify(entries)); updateUI(); }; r.readAsText(inp.files[0]); }
     </script>
 </body>
