@@ -555,9 +555,7 @@
             return `${parts[2]}.${parts[1]}.${parts[0]}`; 
         }
 
-        function formatNumber(num) { 
-            return Number(num.toFixed(2)).toString(); 
-        }
+        function formatNumber(num) { return Number(num.toFixed(2)).toString(); }
 
         function setMode(m) {
             mode = m;
@@ -680,15 +678,15 @@
             const e = entries.find(x => x.id === id);
             if(!e) return;
             
-            // Falls Termin/Dienst bearbeitet wird: Navigiere zum Kalender und öffne Modal
+            // Falls Termin/Dienst bearbeitet wird:
             if(e.cat === 'Termin' || e.cat === 'Dienst') {
                 closeListView({target:{id:'list-view-modal'}}); 
                 showView('view-calendar', document.querySelectorAll('.nav-item')[1], 'Kalender');
                 
                 modalCurrentIsoDate = e.isoStart; 
-                openModal(e.isoStart, getEventsForDate(e.isoStart)); // Workaround: Zeige Modal
+                openModal(e.isoStart, getEventsForDate(e.isoStart)); 
                 
-                // Modal Felder befüllen
+                // Modal Felder befüllen - OHNE löschen zu triggern
                 setTimeout(() => {
                     document.getElementById('modal-date-start').value = e.isoStart;
                     document.getElementById('modal-date-end').value = e.isoEnd;
@@ -700,13 +698,13 @@
                     document.getElementById('modal-note-input').value = e.note || "";
                     setModalType(e.cat);
                     
-                    // Wir löschen den alten Eintrag direkt, damit beim Speichern ein neuer entsteht
-                    deleteEntry(id); 
-                    // Optional: Man könnte hier eine bessere "Update"-Logik bauen, aber Delete+Save ist sicherer für die Datenstruktur
+                    // WICHTIG: Wir setzen nur die Edit-ID, löschen aber NICHT
+                    currentEditId = id; 
                 }, 200);
                 return;
             }
 
+            // Normale Bearbeitung (Stunden, Urlaub etc.)
             showView('view-input', document.querySelectorAll('.nav-item')[0], 'Eintrag bearbeiten');
             
             document.getElementById('inp-cat').value = e.cat;
@@ -743,12 +741,10 @@
             document.getElementById('day-modal').classList.remove('open');
         }
 
-        function ensureIsoDates(e) {
-            if(e.isoStart) return; 
-        }
+        function ensureIsoDates(e) { if(e.isoStart) return; }
 
         function deleteEntry(id) {
-            if(confirm("Löschen?")) {
+            if(confirm("Wirklich löschen?")) {
                 entries = entries.filter(e => e.id !== id);
                 localStorage.setItem('trackData_v5', JSON.stringify(entries));
                 updateUI();
@@ -900,7 +896,6 @@
             return entries.filter(e => {
                 ensureIsoDates(e);
                 if(!e.isoStart) return false;
-                // Robuster String-Vergleich für Zeiträume!
                 if(calendarFilter==='all') return (iso >= e.isoStart && iso <= e.isoEnd);
                 if(calendarFilter==='taken') return (iso >= e.isoStart && iso <= e.isoEnd && e.mode==='taken');
                 if(calendarFilter==='earned') return (iso >= e.isoStart && iso <= e.isoEnd && e.mode==='earned');
@@ -966,6 +961,7 @@
         // --- MODAL DAY ---
         function openModal(iso, events) {
             modalCurrentIsoDate = iso;
+            currentEditId = null; // WICHTIG: Reset Edit Mode beim Öffnen
             document.getElementById('modal-date-title').innerText = formatDateDE(iso);
             const body = document.getElementById('modal-body'); body.innerHTML = '';
             
@@ -992,7 +988,7 @@
                     </div>`;
             });
 
-            // Init modal fields for NEW entry
+            // Felder für neuen Eintrag initialisieren
             document.getElementById('modal-date-start').value = iso;
             document.getElementById('modal-date-end').value = iso;
             document.getElementById('modal-time-start').value = "";
@@ -1010,14 +1006,19 @@
             const te = document.getElementById('modal-time-end').value;
             
             if(!ds || !de) { alert('Datum fehlt'); return; }
-            if(!t && modalSelectedType === 'Termin') { alert('Titel fehlt'); return; } // Titel bei Dienst optional
+            if(!t && modalSelectedType === 'Termin') { alert('Titel fehlt'); return; } 
             
             let td = modalSelectedType;
             if(ts && te) td = `${ts} - ${te} Uhr`;
             else if(ts) td = `${ts} Uhr`;
             
-            // Falls mehrtägig, Info hinzufügen
             if (ds !== de) td += ` (bis ${formatDateDE(de)})`;
+
+            // Falls wir im Edit-Modus sind: Alten Eintrag löschen bevor wir den neuen speichern
+            if(currentEditId) {
+                entries = entries.filter(e => e.id !== currentEditId);
+                currentEditId = null; 
+            }
 
             entries.unshift({ 
                 id: Date.now(), 
@@ -1033,7 +1034,7 @@
             });
             
             localStorage.setItem('trackData_v5', JSON.stringify(entries));
-            // Reload modal content (workaround: close and reopen or just refresh list)
+            // Aktualisiere Modal, aber bleibe auf dem Datum, damit man das Ergebnis sieht
             openModal(modalCurrentIsoDate, getEventsForDate(modalCurrentIsoDate)); 
             updateUI();
         }
@@ -1061,5 +1062,3 @@
         function exportData() { const b=new Blob([JSON.stringify({entries,settings})],{type:"application/json"}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download="backup_v34.json"; a.click(); }
         function importData(inp) { const r=new FileReader(); r.onload=e=>{ let d=JSON.parse(e.target.result); if(Array.isArray(d)) entries=d; else { entries=d.entries; settings=d.settings; } localStorage.setItem('trackData_v5', JSON.stringify(entries)); updateUI(); }; r.readAsText(inp.files[0]); }
     </script>
-</body>
-</html>
