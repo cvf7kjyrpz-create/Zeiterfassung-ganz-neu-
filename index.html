@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Arbeitszeit V31">
-    <title>Arbeitszeit Tracker V31</title>
+    <meta name="apple-mobile-web-app-title" content="Arbeitszeit V32">
+    <title>Arbeitszeit Tracker V32</title>
 
     <style>
         :root {
@@ -60,7 +60,14 @@
             border-bottom: 1px solid var(--card-border);
             z-index: 100;
         }
-        header h1 { margin: 0; font-size: 16px; font-weight: 600; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; }
+        header h1 { 
+            margin: 0; 
+            font-size: 16px; 
+            font-weight: 600; 
+            color: var(--text-sub); 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+        }
 
         /* Main Area */
         main {
@@ -71,10 +78,23 @@
         }
 
         /* Eingabe Form */
-        .input-row { display: flex; gap: 10px; margin-bottom: 12px; }
-        .input-col { flex: 1; min-width: 0; }
+        .input-row { 
+            display: flex; 
+            gap: 10px; 
+            margin-bottom: 12px; 
+        }
+        .input-col { 
+            flex: 1; 
+            min-width: 0; 
+        }
         
-        label { display: block; color: var(--text-sub); font-size: 11px; margin-bottom: 5px; text-transform: uppercase; }
+        label { 
+            display: block; 
+            color: var(--text-sub); 
+            font-size: 11px; 
+            margin-bottom: 5px; 
+            text-transform: uppercase; 
+        }
         
         input, select, textarea {
             width: 100%;
@@ -89,15 +109,39 @@
             font-family: inherit;
         }
 
-        textarea { resize: none; height: 70px; }
+        textarea { 
+            resize: none; 
+            height: 70px; 
+        }
         
         /* Buttons */
         .btn {
-            width: 100%; padding: 14px; border-radius: 8px; border: none; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 5px;
+            width: 100%; 
+            padding: 14px; 
+            border-radius: 8px; 
+            border: none; 
+            font-size: 16px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            margin-top: 5px;
         }
-        .btn-primary { background-color: var(--card-border); color: var(--accent); }
-        .btn-danger { background: none; color: var(--text-sub); border: 1px solid var(--card-border); padding: 8px; font-size: 12px; }
-        .btn-outline { background: transparent; border: 1px solid var(--accent); color: var(--accent); margin-top: 10px; }
+        .btn-primary { 
+            background-color: var(--card-border); 
+            color: var(--accent); 
+        }
+        .btn-danger { 
+            background: none; 
+            color: var(--text-sub); 
+            border: 1px solid var(--card-border); 
+            padding: 8px; 
+            font-size: 12px; 
+        }
+        .btn-outline { 
+            background: transparent; 
+            border: 1px solid var(--accent); 
+            color: var(--accent); 
+            margin-top: 10px; 
+        }
         
         /* LIST BUTTON - BLAU & AUFFÄLLIG */
         .btn-list-view {
@@ -113,24 +157,49 @@
             cursor: pointer;
             box-shadow: 0 4px 10px rgba(10, 132, 255, 0.3);
         }
-        .btn-list-view:active { transform: scale(0.98); opacity: 0.9; }
+        .btn-list-view:active { 
+            transform: scale(0.98); 
+            opacity: 0.9; 
+        }
 
         /* Toggle Switch */
         .toggle-container {
-            display: flex; background: var(--card); border-radius: 8px; padding: 2px; margin-bottom: 15px; border: 1px solid var(--card-border);
+            display: flex; 
+            background: var(--card); 
+            border-radius: 8px; 
+            padding: 2px; 
+            margin-bottom: 15px; 
+            border: 1px solid var(--card-border);
         }
         .toggle-btn {
-            flex: 1; padding: 8px; text-align: center; font-weight: 500; font-size: 13px; border-radius: 6px; transition: 0.2s; cursor: pointer;
+            flex: 1; 
+            padding: 8px; 
+            text-align: center; 
+            font-weight: 500; 
+            font-size: 13px; 
+            border-radius: 6px; 
+            transition: 0.2s; 
+            cursor: pointer;
         }
-        .toggle-btn.active { background: #3a3a3c; color: #fff; }
+        .toggle-btn.active { 
+            background: #3a3a3c; 
+            color: #fff; 
+        }
 
         /* Helper */
         .hidden { display: none; }
 
         /* VERLAUF LISTE (Allgemein) */
         .history-item {
-            background-color: var(--card); padding: 12px 14px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #555; position: relative;
-            display: flex; justify-content: space-between; align-items: center;
+            background-color: var(--card); 
+            padding: 12px 14px; 
+            border-radius: 8px; 
+            margin-bottom: 8px; 
+            border-left: 4px solid #555; 
+            position: relative;
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
         }
         .cat-urlaub { border-left-color: var(--c-urlaub); }
         .cat-stunden { border-left-color: var(--c-stunden); }
@@ -149,8 +218,19 @@
         .h-val.pos { color: #30d158; }
         .h-note { margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 13px; color: #ddd; font-style: italic; }
         
-        .h-delete-btn {
-            background: none; border: none; font-size: 18px; cursor: pointer; padding: 10px; opacity: 0.6;
+        /* Buttons in der Liste (Bearbeiten / Löschen) */
+        .h-btn-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        .h-action-btn {
+            background: none; 
+            border: none; 
+            font-size: 16px; 
+            cursor: pointer; 
+            padding: 5px; 
+            opacity: 0.7;
         }
 
         /* STATISTIK GRID */
@@ -329,7 +409,7 @@
 
     <main>
         <div id="view-input" class="view active">
-            <div class="toggle-container">
+            <div class="toggle-container" id="mode-toggle-group">
                 <div class="toggle-btn active" id="btn-taken" onclick="setMode('taken')">Genommen (-)</div>
                 <div class="toggle-btn" id="btn-earned" onclick="setMode('earned')">Erhalten (+)</div>
             </div>
@@ -344,7 +424,20 @@
                         <option value="DA">DA Dienstausgleich</option>
                         <option value="Langzeitkonto">Langzeitkonto (Std)</option>
                         <option value="Sonderurlaub">Sonderurlaub (Tage)</option>
+                        <option value="Termin" style="color:var(--accent); font-weight:bold;">Termin (Zeitraum)</option>
+                        <option value="Dienst" style="color:var(--accent); font-weight:bold;">Dienst (Zeitraum)</option>
                     </select>
+                </div>
+            </div>
+
+            <div id="section-full-datetime" class="hidden">
+                 <div class="input-row">
+                    <div class="input-col"><label>Start Datum</label><input type="date" id="fdt-start-date"></div>
+                    <div class="input-col"><label>Start Zeit</label><input type="time" id="fdt-start-time"></div>
+                </div>
+                <div class="input-row">
+                    <div class="input-col"><label>Ende Datum</label><input type="date" id="fdt-end-date"></div>
+                    <div class="input-col"><label>Ende Zeit</label><input type="time" id="fdt-end-time"></div>
                 </div>
             </div>
 
@@ -385,12 +478,13 @@
 
             <div class="input-row">
                 <div class="input-col">
-                    <label>Notiz</label>
-                    <textarea id="inp-note" placeholder="Grund..."></textarea>
+                    <label>Notiz / Titel</label>
+                    <textarea id="inp-note" placeholder="Beschreibung..."></textarea>
                 </div>
             </div>
 
-            <button class="btn btn-primary" onclick="saveEntry()">Buchen</button>
+            <button class="btn btn-primary" id="btn-save-main" onclick="saveEntry()">Buchen</button>
+            <div id="edit-mode-hint" style="display:none; text-align:center; color:var(--accent); margin-top:10px; font-size:12px;">Modus: Eintrag bearbeiten</div>
         </div>
 
         <div id="view-calendar" class="view">
@@ -456,17 +550,25 @@
             <div id="modal-body"></div>
             
             <div class="modal-add-area">
-                <div class="modal-add-title">Neuer Eintrag</div>
+                <div class="modal-add-title">Schnell-Eintrag</div>
                 
                 <div class="modal-type-selector">
                     <div class="modal-type-btn active" id="type-termin" onclick="setModalType('Termin')">Termin</div>
                     <div class="modal-type-btn" id="type-dienst" onclick="setModalType('Dienst')">Dienst</div>
                 </div>
 
-                <div style="display:flex; gap:10px; margin-bottom:10px;">
-                    <input type="time" id="modal-time-input" style="width: 110px; font-size:14px;">
-                    <input type="text" id="modal-note-input" placeholder="Beschreibung..." style="flex:1; font-size:14px;">
+                <div style="display:flex; gap:5px; margin-bottom:10px;">
+                    <div style="flex:1;">
+                        <label style="font-size:9px; color:#888;">Von</label>
+                        <input type="time" id="modal-time-start" style="width: 100%; font-size:13px; padding:8px;">
+                    </div>
+                    <div style="flex:1;">
+                        <label style="font-size:9px; color:#888;">Bis</label>
+                        <input type="time" id="modal-time-end" style="width: 100%; font-size:13px; padding:8px;">
+                    </div>
                 </div>
+
+                <input type="text" id="modal-note-input" placeholder="Beschreibung..." style="margin-bottom:10px; font-size:14px;">
                 
                 <div class="modal-color-row">
                     <div class="modal-color-btn selected" style="background-color: var(--note-pink)" onclick="selectModalColor(this, 'pink')"></div>
@@ -477,8 +579,6 @@
                 </div>
                 
                 <button class="btn btn-primary" onclick="saveModalNote()" style="padding:10px; font-size:14px;">Speichern</button>
-                
-                <button class="btn btn-outline" onclick="goToFullBooking()" style="width:100%; font-size:12px; padding:10px;">📝 Urlaub / Stunden buchen</button>
             </div>
         </div>
     </div>
@@ -527,6 +627,7 @@
         let modalCurrentIsoDate = null; 
         let modalSelectedColor = 'pink'; 
         let modalSelectedType = 'Termin';
+        let currentEditId = null; // Für Bearbeitungsmodus
 
         const COLOR_MAP = {
             'pink': '#FF2D55',
@@ -543,6 +644,8 @@
             if(document.getElementById('date-start')) document.getElementById('date-start').value = today;
             if(document.getElementById('date-end')) document.getElementById('date-end').value = today;
             if(document.getElementById('date-manual')) document.getElementById('date-manual').value = today;
+            if(document.getElementById('fdt-start-date')) document.getElementById('fdt-start-date').value = today;
+            if(document.getElementById('fdt-end-date')) document.getElementById('fdt-end-date').value = today;
             
             updateForm();
             updateUI();
@@ -614,25 +717,34 @@
             const cTime = document.getElementById('section-time-range');
             const cDate = document.getElementById('section-date-range');
             const cManual = document.getElementById('section-manual');
+            const cFull = document.getElementById('section-full-datetime');
+            const toggles = document.getElementById('mode-toggle-group');
             const lblAmount = document.getElementById('lbl-amount');
 
             cTime.classList.add('hidden');
             cDate.classList.add('hidden');
             cManual.classList.add('hidden');
+            cFull.classList.add('hidden');
+            toggles.style.display = 'flex'; // Standard sichtbar
 
-            if (mode === 'earned') {
-                cManual.classList.remove('hidden');
-                if (['Urlaub','Kindkrank','DA','Sonderurlaub'].includes(cat)) {
-                    lblAmount.innerText = "Menge (Tage)";
-                } else {
-                    lblAmount.innerText = "Menge (Stunden)";
-                }
+            if (cat === 'Termin' || cat === 'Dienst') {
+                cFull.classList.remove('hidden');
+                toggles.style.display = 'none'; // Plus/Minus hier unnötig
             } else {
-                if (cat === 'Stunden' || cat === 'Langzeitkonto') {
-                    cTime.classList.remove('hidden');
-                    autoFillTimes();
+                if (mode === 'earned') {
+                    cManual.classList.remove('hidden');
+                    if (['Urlaub','Kindkrank','DA','Sonderurlaub'].includes(cat)) {
+                        lblAmount.innerText = "Menge (Tage)";
+                    } else {
+                        lblAmount.innerText = "Menge (Stunden)";
+                    }
                 } else {
-                    cDate.classList.remove('hidden');
+                    if (cat === 'Stunden' || cat === 'Langzeitkonto') {
+                        cTime.classList.remove('hidden');
+                        autoFillTimes();
+                    } else {
+                        cDate.classList.remove('hidden');
+                    }
                 }
             }
         }
@@ -692,7 +804,40 @@
             // Standard 8 falls nicht konfiguriert
             const hoursPerDay = 8;
 
-            if (!document.getElementById('section-manual').classList.contains('hidden')) {
+            // LOGIK FÜR TERMIN / DIENST (V32)
+            if (cat === 'Termin' || cat === 'Dienst') {
+                const ds = document.getElementById('fdt-start-date').value;
+                const ts = document.getElementById('fdt-start-time').value;
+                const de = document.getElementById('fdt-end-date').value;
+                const te = document.getElementById('fdt-end-time').value;
+                
+                if(!ds || !de) { alert("Bitte Datum prüfen"); return; }
+                
+                isoStart = ds; 
+                isoEnd = de;
+                
+                // Formatierung für Anzeige
+                if (ds === de) {
+                    // Gleicher Tag
+                    displayDate = formatDateDE(ds);
+                    if(ts && te) displayTime = `${ts} - ${te} Uhr`;
+                    else if(ts) displayTime = `${ts} Uhr`;
+                    else displayTime = cat; // Wenn gar keine Zeit
+                } else {
+                    // Mehrere Tage
+                    displayDate = `${formatDateDE(ds)} - ${formatDateDE(de)}`;
+                    let tStr = "";
+                    if(ts) tStr += ts; 
+                    if(te) tStr += " - " + te;
+                    displayTime = tStr ? tStr : "Ganztägig";
+                    
+                    // Optional: Volle Info für Liste erzwingen
+                    if(ts && te) displayTime = `${formatDateDE(ds)} ${ts} - ${formatDateDE(de)} ${te}`;
+                }
+                mode = 'note'; // Immer "Notiz"-Modus für Termine
+
+            } else if (!document.getElementById('section-manual').classList.contains('hidden')) {
+                // MANUELLE EINGABE
                 const val = parseFloat(document.getElementById('inp-amount').value);
                 const d = document.getElementById('date-manual').value;
                 if (isNaN(val) || !d) { alert('Bitte Menge prüfen'); return; }
@@ -700,26 +845,26 @@
                 displayTime = "Pauschal";
                 hoursValue = (['Urlaub','Kindkrank','DA','Sonderurlaub'].includes(cat)) ? val * hoursPerDay : val;
                 isoStart = d; isoEnd = d;
+
             } else if (!document.getElementById('section-time-range').classList.contains('hidden')) {
+                // STUNDEN EINGABE (Zeitraum an einem Tag)
                 const d = document.getElementById('date-single').value;
                 const t1 = document.getElementById('time-start').value;
                 const t2 = document.getElementById('time-end').value;
                 
                 let manualOverride = parseFloat(document.getElementById('time-duration-override').value);
                 if(isNaN(manualOverride)) {
-                    let s = t1.split(':').map(Number);
-                    let e = t2.split(':').map(Number);
-                    let diff = (e[0]*60 + e[1]) - (s[0]*60 + s[1]);
-                    if(diff === 0) diff = 24 * 60; 
-                    if(diff < 0) diff += 1440; 
-                    manualOverride = diff / 60;
+                    calculateDuration(); 
+                    manualOverride = parseFloat(document.getElementById('time-duration-override').value);
                 }
 
                 hoursValue = manualOverride;
                 displayDate = formatDateDE(d);
                 displayTime = `${t1} - ${t2}`;
                 isoStart = d; isoEnd = d;
+
             } else if (!document.getElementById('section-date-range').classList.contains('hidden')) {
+                // TAGE EINGABE (Urlaub etc.)
                 const d1 = document.getElementById('date-start').value;
                 const d2 = document.getElementById('date-end').value;
                 const days = parseFloat(document.getElementById('calc-days-val').value);
@@ -729,6 +874,14 @@
                 displayTime = days + " Tag(e)";
                 hoursValue = days * hoursPerDay;
                 isoStart = d1; isoEnd = d2;
+            }
+
+            // FALLS BEARBEITUNG: ALTEN LÖSCHEN
+            if(currentEditId) {
+                entries = entries.filter(e => e.id !== currentEditId);
+                currentEditId = null;
+                document.getElementById('btn-save-main').innerText = "Buchen";
+                document.getElementById('edit-mode-hint').style.display = 'none';
             }
 
             const newEntry = {
@@ -750,6 +903,65 @@
             document.getElementById('inp-note').value = "";
             document.getElementById('inp-amount').value = "";
             updateUI();
+        }
+
+        // --- BEARBEITEN FUNKTION ---
+        function editEntry(id) {
+            const e = entries.find(x => x.id === id);
+            if(!e) return;
+            
+            // Ansicht wechseln
+            showView('view-input', document.querySelectorAll('.nav-item')[0], 'Eintrag bearbeiten');
+            
+            // Felder füllen
+            document.getElementById('inp-cat').value = e.cat;
+            document.getElementById('inp-note').value = e.note || "";
+            
+            // Modus setzen
+            if(e.mode === 'taken' || e.mode === 'earned') setMode(e.mode);
+            
+            updateForm(); // Richtige Sektion anzeigen
+
+            // Daten je nach Kategorie füllen
+            if(e.cat === 'Termin' || e.cat === 'Dienst') {
+                document.getElementById('fdt-start-date').value = e.isoStart;
+                document.getElementById('fdt-end-date').value = e.isoEnd;
+                // Versuch Zeiten aus timeDesc zu extrahieren (Regex)
+                const times = e.timeDesc.match(/(\d{2}:\d{2})/g);
+                if(times && times.length >= 1) document.getElementById('fdt-start-time').value = times[0];
+                if(times && times.length >= 2) document.getElementById('fdt-end-time').value = times[1];
+
+            } else if(['Urlaub','Kindkrank','DA','Sonderurlaub'].includes(e.cat) && e.mode === 'taken') {
+                document.getElementById('date-start').value = e.isoStart;
+                document.getElementById('date-end').value = e.isoEnd;
+                calcDaysDiff();
+
+            } else if((e.cat === 'Stunden' || e.cat === 'Langzeitkonto') && e.mode === 'taken') {
+                document.getElementById('date-single').value = e.isoStart;
+                document.getElementById('time-duration-override').value = formatNumber(e.hours);
+                 // Zeiten versuchen zu rekonstruieren
+                 const times = e.timeDesc.match(/(\d{2}:\d{2})/g);
+                 if(times && times.length >= 2) {
+                     document.getElementById('time-start').value = times[0];
+                     document.getElementById('time-end').value = times[1];
+                 }
+
+            } else {
+                // Manuell / Erhalten
+                document.getElementById('date-manual').value = e.isoStart;
+                let val = e.hours;
+                if(['Urlaub','Kindkrank','DA','Sonderurlaub'].includes(e.cat)) val = val/8;
+                document.getElementById('inp-amount').value = formatNumber(val);
+            }
+
+            // Status auf Bearbeiten
+            currentEditId = id;
+            document.getElementById('btn-save-main').innerText = "Änderung speichern";
+            document.getElementById('edit-mode-hint').style.display = 'block';
+            
+            // Modals schließen
+            document.getElementById('list-view-modal').classList.remove('open');
+            document.getElementById('day-modal').classList.remove('open');
         }
 
         function ensureIsoDates(e) {
@@ -778,7 +990,10 @@
                 localStorage.setItem('trackData_v5', JSON.stringify(entries));
                 updateUI();
                 if(document.getElementById('day-modal').classList.contains('open')) {
-                    openModal(modalCurrentIsoDate, getEventsForDate(modalCurrentIsoDate));
+                    // Refresh modal
+                    const evs = getEventsForDate(modalCurrentIsoDate);
+                    if(evs.length===0) closeModalDirect();
+                    else openModal(modalCurrentIsoDate, evs);
                 }
             }
         }
@@ -828,7 +1043,7 @@
                 let customStyle = '';
                 
                 if((e.cat === 'Termin' || e.cat === 'Dienst') && e.color) {
-                    customStyle = `border-left-color: ${e.color};`;
+                    customStyle = `border-left-color: ${e.color || '#555'};`;
                     colorClass = 'cat-termin';
                 } else {
                     if(e.cat.startsWith('Urlaub')) colorClass = 'cat-urlaub';
@@ -860,6 +1075,7 @@
 
                 let noteHtml = (e.cat !== 'Termin' && e.cat !== 'Dienst' && e.note) ? `<div class="h-note">${e.note}</div>` : '';
 
+                // HTML Aufbau
                 let item = `
                     <div class="history-item ${colorClass}" style="${customStyle}">
                         <div class="h-content">
@@ -872,7 +1088,10 @@
                             </div>
                             ${noteHtml}
                         </div>
-                        <button class="h-delete-btn" onclick="deleteEntry(${e.id})">🗑️</button>
+                        <div class="h-btn-group">
+                            <button class="h-action-btn" onclick="editEntry(${e.id})">✎</button>
+                            <button class="h-action-btn" onclick="deleteEntry(${e.id})" style="color:#FF453A;">🗑️</button>
+                        </div>
                     </div>
                 `;
                 list.innerHTML += item;
@@ -1029,15 +1248,13 @@
             });
         }
 
-        // V31: SORT HELPER (Time Parse)
         function getTimeFromEntry(e) {
-            // Versuche Zeit aus timeDesc zu lesen (Format "14:30 Uhr")
-            if(!e.timeDesc) return "00:00";
-            const match = e.timeDesc.match(/(\d{1,2}):(\d{2})/);
-            if(match) {
-                return match[1].padStart(2,'0') + ":" + match[2];
+            // Helper für Sortierung
+            if(e.cat === 'Termin' || e.cat === 'Dienst') {
+                let m = e.timeDesc.match(/(\d{2}:\d{2})/);
+                return m ? m[1] : "00:00";
             }
-            return "00:00"; // Fallback
+            return "00:00";
         }
 
         // V31: MODAL LIST + SORTIERUNG
@@ -1065,13 +1282,11 @@
                 return false;
             });
 
-            // V31: STRICT CHRONOLOGICAL SORT (Date + Time)
+            // Sortierung: Erst Datum, dann Zeit
             yearEntries.sort((a,b) => {
-                // 1. Datum Vergleich
                 const dateComp = a.isoStart.localeCompare(b.isoStart);
                 if(dateComp !== 0) return dateComp;
                 
-                // 2. Zeit Vergleich (wenn Datum gleich)
                 const timeA = getTimeFromEntry(a);
                 const timeB = getTimeFromEntry(b);
                 return timeA.localeCompare(timeB);
@@ -1112,7 +1327,7 @@
                 let dateStr = e.date; 
                 let amountStr = "";
                 if(['Urlaub','Kindkrank','DA','Sonderurlaub'].includes(e.cat)) {
-                    amountStr = (e.hours / 8) + " Tg"; 
+                    amountStr = (e.hours / 8).toFixed(2) + " Tg"; 
                 } else {
                     amountStr = e.hours + " Std";
                 }
@@ -1126,13 +1341,14 @@
                 let timeClass = (e.isoStart < todayIso) ? 'past' : 'future';
 
                 let item = `
-                    <div class="list-view-item ${timeClass}" onclick="jumpToDateFromList('${e.isoStart}')">
+                    <div class="list-view-item ${timeClass}">
                         <div class="lv-dot" style="background:${color}"></div>
-                        <div class="lv-info">
+                        <div class="lv-info" onclick="jumpToDate('${e.isoStart}')">
                             <div class="lv-title">${displayTitle}</div>
                             <div class="lv-meta">${dateStr} | ${amountStr ? sign + ' ' + amountStr : e.timeDesc}</div>
                             ${noteHtml}
                         </div>
+                        <button class="h-action-btn" onclick="editEntry(${e.id})">✎</button>
                     </div>
                 `;
                 container.innerHTML += item;
@@ -1156,7 +1372,7 @@
             root.innerHTML = '';
             const months = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"];
 
-            // V31: Ermittle aktuellen Monat für Auto-Scroll
+            // Auto-Scroll Check
             const now = new Date();
             const currentMonthIdx = now.getMonth();
             const currentYear = now.getFullYear();
@@ -1165,7 +1381,6 @@
                 const monthDiv = document.createElement('div');
                 monthDiv.className = 'month-card';
                 
-                // V31: ID für Auto-Scroll setzen
                 if(currentCalYear === currentYear && i === currentMonthIdx) {
                     monthDiv.id = 'current-month-card';
                 }
@@ -1262,7 +1477,7 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = "backup_v31_full_" + new Date().toISOString().slice(0,10) + ".json";
+            a.download = "backup_v32_full_" + new Date().toISOString().slice(0,10) + ".json";
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -1309,10 +1524,12 @@
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            el.classList.add('active');
+            
+            if(el) el.classList.add('active');
+            
             document.getElementById('header-title').innerText = title;
 
-            // V31: Auto Scroll wenn Kalender geöffnet wird
+            // Auto Scroll wenn Kalender geöffnet wird (V31)
             if(id === 'view-calendar') {
                 setTimeout(() => {
                     const cur = document.getElementById('current-month-card');
@@ -1321,18 +1538,19 @@
             }
         }
 
-        // --- POPUP LOGIC ---
-        function openModal(isoDate, events) {
-            modalCurrentIsoDate = isoDate;
-            const title = document.getElementById('modal-date-title');
-            title.innerText = formatDateDE(isoDate);
+        // --- POPUP MODAL (Kalender) ---
+        function openModal(iso, events) {
+            modalCurrentIsoDate = iso;
+            document.getElementById('modal-date-title').innerText = formatDateDE(iso);
             const body = document.getElementById('modal-body');
             body.innerHTML = '';
 
-            if(events && events.length > 0) {
-                // V31: Sortiere auch im Popup chronologisch
-                events.sort((a,b) => getTimeFromEntry(a).localeCompare(getTimeFromEntry(b)));
+            // Sortierung
+            events.sort((a,b) => getTimeFromEntry(a).localeCompare(getTimeFromEntry(b)));
 
+            if(events.length === 0) {
+                body.innerHTML = '<div style="color:#666; text-align:center; padding:20px;">Keine Einträge für diesen Tag.</div>';
+            } else {
                 events.forEach(e => {
                     let displayVal = "";
                     let displayName = e.cat;
@@ -1346,6 +1564,9 @@
                         displayVal = formatNumber(e.hours) + " Std";
                     }
                     
+                    let col = e.color || '#fff';
+                    if(!e.color && e.cat.startsWith('Urlaub')) col = 'var(--c-urlaub)';
+
                     let row = document.createElement('div');
                     row.style.marginBottom = "10px";
                     row.style.borderBottom = "1px solid #333";
@@ -1356,27 +1577,30 @@
                     
                     let left = `
                         <div>
-                            <div style="font-weight:bold; color:var(--accent); display:flex; align-items:center; gap:5px;">
+                            <div style="font-weight:bold; color:${col}; display:flex; align-items:center; gap:5px;">
                                 ${displayName}
                                 ${e.color ? `<div style="width:10px; height:10px; border-radius:50%; background:${e.color}; border:1px solid #fff;"></div>` : ''}
                             </div>
                             <div style="font-size:13px; color:#aaa">${e.timeDesc}</div>
-                            ${displayVal ? `<div style="margin-top:2px;">${e.mode === 'taken' ? 'Genommen' : 'Erhalten'}: ${displayVal}</div>` : ''}
-                            ${(e.cat !== 'Termin' && e.cat !== 'Dienst' && e.note) ? `<div style="font-style:italic; font-size:12px; margin-top:4px; color:#888;">"${e.note}"</div>` : ''}
+                            ${displayVal ? `<div style="margin-top:2px; font-size:12px;">${e.mode === 'taken' ? 'Genommen' : 'Erhalten'}: ${displayVal}</div>` : ''}
                         </div>
                     `;
-                    let right = `<button onclick="deleteEntry(${e.id})" style="background:none; border:none; color:#FF453A; font-size:12px;">🗑️</button>`;
+                    let right = `
+                        <div style="display:flex;">
+                            <button onclick="editEntry(${e.id})" style="background:none; border:none; margin-right:15px; cursor:pointer; font-size:16px;">✎</button>
+                            <button onclick="deleteEntry(${e.id})" style="background:none; border:none; color:#FF453A; font-size:16px;">🗑️</button>
+                        </div>
+                    `;
                     
                     row.innerHTML = left + right;
                     body.appendChild(row);
                 });
-            } else {
-                body.innerHTML = '<div style="color:#666; text-align:center; padding:20px;">Keine Einträge für diesen Tag.</div>';
             }
             
             // Reset Modal Input
             document.getElementById('modal-note-input').value = "";
-            document.getElementById('modal-time-input').value = ""; // RESET TIME
+            document.getElementById('modal-time-start').value = "";
+            document.getElementById('modal-time-end').value = "";
             setModalType('Termin'); 
             modalSelectedColor = 'pink';
             document.querySelectorAll('.modal-color-btn').forEach(b => b.classList.remove('selected'));
@@ -1402,11 +1626,14 @@
             const text = document.getElementById('modal-note-input').value;
             if(!text) { alert("Bitte Namen eingeben"); return; }
             
-            const timeVal = document.getElementById('modal-time-input').value;
-            let displayTime = modalSelectedType; // Default "Termin"
+            const t1 = document.getElementById('modal-time-start').value;
+            const t2 = document.getElementById('modal-time-end').value;
+            let displayTime = modalSelectedType; 
             
-            if(timeVal) {
-                displayTime = timeVal + " Uhr";
+            if(t1 && t2) {
+                displayTime = `${t1} - ${t2} Uhr`;
+            } else if (t1) {
+                displayTime = `${t1} Uhr`;
             }
 
             const colorCode = COLOR_MAP[modalSelectedColor];
@@ -1417,7 +1644,7 @@
                 date: formatDateDE(modalCurrentIsoDate),
                 isoStart: modalCurrentIsoDate,
                 isoEnd: modalCurrentIsoDate,
-                timeDesc: displayTime, // Contains Type or Time
+                timeDesc: displayTime, 
                 hours: 0,
                 mode: 'note',
                 note: text,
@@ -1438,6 +1665,8 @@
             document.getElementById('date-start').value = modalCurrentIsoDate;
             document.getElementById('date-end').value = modalCurrentIsoDate;
             document.getElementById('date-manual').value = modalCurrentIsoDate;
+            document.getElementById('fdt-start-date').value = modalCurrentIsoDate;
+            document.getElementById('fdt-end-date').value = modalCurrentIsoDate;
             
             updateForm();
             autoFillTimes();
