@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Arbeitszeit V42">
-    <title>Arbeitszeit Tracker V42</title>
+    <meta name="apple-mobile-web-app-title" content="Arbeitszeit V43">
+    <title>Arbeitszeit Tracker V43</title>
 
     <style>
         :root {
@@ -27,7 +27,7 @@
             --c-lzk: #30D158;
             --c-sonder: #64D2FF;
 
-            /* Kalender */
+            /* Kalender Marker */
             --past: #FF453A;
             --future: #30D158;
         }
@@ -43,17 +43,17 @@
         .input-col { flex: 1; min-width: 0; }
         label { display: block; color: var(--text-sub); font-size: 11px; margin-bottom: 5px; text-transform: uppercase; }
         
-        input, select, textarea {
-            width: 100%; height: 45px; background-color: var(--input); border: 1px solid var(--card-border); color: white; padding: 10px; border-radius: 8px; font-size: 16px; box-sizing: border-box; -webkit-appearance: none; font-family: inherit;
-        }
+        input, select, textarea { width: 100%; height: 45px; background-color: var(--input); border: 1px solid var(--card-border); color: white; padding: 10px; border-radius: 8px; font-size: 16px; box-sizing: border-box; -webkit-appearance: none; font-family: inherit; }
         textarea { resize: none; height: 70px; }
         
         .btn { width: 100%; padding: 14px; border-radius: 8px; border: none; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 5px; }
         .btn-primary { background-color: var(--card-border); color: var(--accent); }
         .btn-list-view { width: 100%; padding: 10px; background: var(--accent); color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; margin-bottom: 10px; cursor: pointer; }
 
+        .hidden { display: none !important; }
+
         /* Listen */
-        .history-item, .list-view-item, .upcoming-item { background-color: var(--card); padding: 12px 14px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #555; position: relative; display: flex; justify-content: space-between; align-items: center; }
+        .history-item, .list-view-item, .upcoming-item { background-color: var(--card); padding: 10px 12px; border-radius: 8px; margin-bottom: 6px; border-left: 4px solid #555; position: relative; display: flex; justify-content: space-between; align-items: center; }
         .cat-urlaub { border-left-color: var(--c-urlaub); }
         .cat-stunden { border-left-color: var(--c-stunden); }
         .cat-krank { border-left-color: var(--c-krank); }
@@ -63,13 +63,13 @@
         
         .h-content, .lv-info { flex: 1; min-width: 0; }
         .h-top { display: flex; justify-content: space-between; align-items: flex-start; }
-        .h-title, .lv-title { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .h-meta, .lv-meta, .u-meta { font-size: 12px; color: var(--text-sub); margin-top: 2px;}
-        .h-val { font-size: 15px; font-weight: 700; text-align: right; margin-right: 10px; white-space: nowrap;}
+        .h-title, .lv-title { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .h-meta, .lv-meta, .u-meta { font-size: 11px; color: var(--text-sub); margin-top: 2px;}
+        .h-val { font-size: 14px; font-weight: 700; text-align: right; margin-right: 10px; white-space: nowrap;}
         .h-val.neg { color: #ff453a; }
         .h-val.pos { color: #30d158; }
         .h-btn-group { display: flex; gap: 10px; align-items: center; z-index: 10; position: relative; }
-        .h-action-btn { background: #2c2c2e; border: 1px solid #444; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; }
+        .h-action-btn { background: #2c2c2e; border: 1px solid #444; color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; }
 
         /* Kalender */
         #cal-sticky-header { position: sticky; top: -15px; background-color: var(--bg); z-index: 50; padding-top: 15px; padding-bottom: 5px; margin-bottom: 10px; border-bottom: 1px solid var(--card-border); }
@@ -104,20 +104,47 @@
         .cat-btn.active { background: #3a3a3c; border: 2px solid var(--accent); color: white; box-shadow: 0 0 8px rgba(10,132,255,0.4); }
         .cat-btn-icon { font-size: 20px; margin-bottom: 2px; }
 
-        .lv-icon, .u-icon { font-size: 18px; width: 25px; text-align: center; margin-right: 10px; }
+        .lv-icon, .u-icon { font-size: 16px; width: 20px; text-align: center; margin-right: 8px; }
         
-        /* Stats & Tools */
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .stat-box { background-color: var(--card); padding: 8px 10px; border-radius: 8px; border: 1px solid var(--card-border); position: relative; cursor: pointer; }
-        .stat-box h4 { margin: 0 0 2px; font-size: 10px; color: var(--text-sub); text-transform: uppercase; }
-        .stat-box span { font-size: 16px; font-weight: 700; color: var(--text); }
-        .unit { font-size: 10px; color: var(--text-sub); font-weight: 400; margin-left: 2px; }
-        .edit-icon { position: absolute; top: 6px; right: 6px; font-size: 12px; opacity: 0.5; }
-        .stat-box.summary { border-color: #555; background: #2c2c2e; cursor: default; }
-        .stat-box.full-width { grid-column: span 2; cursor: default; }
+        /* --- KOMPAKTE STATISTIK --- */
+        .stats-grid { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); /* 3 SPALTEN */
+            gap: 6px; 
+            margin-bottom: 10px;
+        }
+        .stat-box { 
+            background-color: var(--card); 
+            padding: 8px 5px; 
+            border-radius: 8px; 
+            border: 1px solid var(--card-border); 
+            position: relative; 
+            cursor: pointer; 
+            text-align: center;
+        }
+        .stat-box h4 { margin: 0 0 2px; font-size: 9px; color: var(--text-sub); text-transform: uppercase; }
+        .stat-box span { font-size: 15px; font-weight: 700; color: var(--text); }
+        .unit { font-size: 9px; color: var(--text-sub); font-weight: 400; margin-left: 1px; }
+        .edit-icon { position: absolute; top: 2px; right: 2px; font-size: 10px; opacity: 0.3; }
+        
+        /* Zusammenfassung ganz oben (schmal) */
+        .stat-box.summary { 
+            grid-column: span 3; /* Volle Breite */
+            display: flex; 
+            justify-content: space-around; 
+            align-items: center; 
+            padding: 8px 10px; 
+            background: #2c2c2e; 
+            border-color: #555;
+            cursor: default; 
+        }
+        .stat-box.summary div { display: flex; flex-direction: column; align-items: center; }
 
-        .data-tools { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--card-border); display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .btn-tool { padding: 12px; background: var(--card); border: 1px solid var(--card-border); color: var(--text); border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .stat-box.full-width { grid-column: span 3; padding: 8px; cursor: default; text-align: left;}
+        .stat-box.full-width h4 { margin-bottom: 5px; border-bottom: 1px solid #333; padding-bottom: 4px; }
+
+        .data-tools { margin-top: 10px; padding-top: 15px; border-top: 1px solid var(--card-border); display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .btn-tool { padding: 10px; background: var(--card); border: 1px solid var(--card-border); color: var(--text); border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
         
         .settings-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
         .settings-table td { padding: 5px; }
@@ -126,8 +153,6 @@
         .nav-item { flex: 1; display: flex; justify-content: center; align-items: center; color: #666; font-size: 22px; transition: color 0.2s; }
         .nav-item.active { color: var(--accent); }
         .view { display: none; } .view.active { display: block; }
-        
-        .hidden { display: none !important; }
     </style>
 </head>
 <body>
@@ -313,25 +338,23 @@
         window.onload = function() {
             const today = new Date().toISOString().slice(0,10);
             ['date-start-time','date-end-time','modal-date-start','modal-date-end'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = today; });
-            // Kein UpdateForm mehr nötig, da statisch
             updateUI();
         };
 
         function formatDateDE(isoDate) { if(!isoDate) return ""; const parts = isoDate.split('-'); return `${parts[2]}.${parts[1]}.${parts[0]}`; }
         function formatNumber(num) { return Number(num.toFixed(2)).toString(); }
         
-        // --- HAUPTSEITE SPEICHERN (IMMER STUNDEN ERHALTEN) ---
+        // --- HAUPTSEITE (STUNDEN ERHALTEN) ---
         function saveEntry() {
-            // Feste Werte für Hauptseite
             const cat = 'Stunden'; 
-            const mode = 'earned';
+            const mode = 'earned'; // Fixiert auf Erhalten
             
             const ds = document.getElementById('date-start-time').value;
             const de = document.getElementById('date-end-time').value;
             const note = document.getElementById('inp-note').value;
             
             if(!ds) { alert('Datum fehlt'); return; }
-            if(!de) { document.getElementById('date-end-time').value = ds; } // Fallback
+            if(!de) { document.getElementById('date-end-time').value = ds; }
             
             let manualH = document.getElementById('hours-manual-val').value;
             if(manualH === "") { alert('Bitte Stunden eingeben (oder 0)'); return; }
@@ -342,7 +365,8 @@
             
             if(currentEditId) { entries = entries.filter(e => e.id !== currentEditId); currentEditId = null; document.getElementById('btn-save-main').innerText = "Buchen"; document.getElementById('edit-mode-hint').style.display = 'none'; }
             
-            entries.unshift({ id: Date.now(), cat: cat, date: dispDate, isoStart: ds, isoEnd: de || ds, timeDesc: dispTime, hours: hoursVal, mode: mode, note: note, color: null, icon: '⏰' });
+            // Icon: Für "Erhalten" nutzen wir das Plus
+            entries.unshift({ id: Date.now(), cat: cat, date: dispDate, isoStart: ds, isoEnd: de || ds, timeDesc: dispTime, hours: hoursVal, mode: mode, note: note, color: null, icon: '➕' });
             localStorage.setItem('trackData_v5', JSON.stringify(entries)); alert('Gespeichert'); updateUI();
             
             document.getElementById('hours-manual-val').value = "";
@@ -353,47 +377,46 @@
         function editEntry(id) {
             const e = entries.find(x => x.id === id); if(!e) return;
             
-            // Wenn der Eintrag NICHT "Stunden erhalten" ist, muss er ins Kalender-Modal
-            // "Stunden erhalten" erkennen wir daran: cat=Stunden und mode=earned
-            if(e.cat !== 'Stunden' || e.mode !== 'earned') {
-                 closeListView({target:{id:'list-view-modal'}}); 
-                 showView('view-calendar', document.querySelectorAll('.nav-item')[1], 'Kalender');
-                 modalCurrentIsoDate = e.isoStart; 
-                 openModal(e.isoStart, getEventsForDate(e.isoStart));
-                 setTimeout(() => {
-                     document.getElementById('modal-date-start').value = e.isoStart; 
-                     document.getElementById('modal-date-end').value = e.isoEnd;
-                     const times = e.timeDesc.match(/(\d{2}:\d{2})/g); 
-                     if(times && times.length >= 1) document.getElementById('modal-time-start').value = times[0]; 
-                     if(times && times.length >= 2) document.getElementById('modal-time-end').value = times[1];
-                     
-                     document.getElementById('modal-note-input').value = e.note || "";
-                     if(e.cat === 'Stunden') {
-                         document.getElementById('modal-hours-input').value = e.hours;
-                         document.getElementById('modal-hours-container').classList.remove('hidden');
-                     }
-
-                     let btn = document.querySelector(`.cat-btn[data-cat="${e.cat}"]`);
-                     if(btn) btn.click();
-                     currentEditId = id; 
-                 }, 200);
-                 return;
+            // Wenn Stunden UND Erhalten -> Hauptseite
+            if(e.cat === 'Stunden' && e.mode === 'earned') {
+                showView('view-input', document.querySelectorAll('.nav-item')[0], 'Eingabe');
+                document.getElementById('date-start-time').value = e.isoStart;
+                document.getElementById('date-end-time').value = e.isoEnd;
+                const times = e.timeDesc.match(/(\d{2}:\d{2})/g); 
+                if(times && times.length >= 2) {
+                     document.getElementById('time-start').value = times[0];
+                     document.getElementById('time-end').value = times[1];
+                }
+                document.getElementById('hours-manual-val').value = e.hours;
+                document.getElementById('inp-note').value = e.note || "";
+                
+                currentEditId = id; document.getElementById('btn-save-main').innerText = "Änderung speichern";
+                document.getElementById('edit-mode-hint').style.display = 'block';
+                return;
             }
 
-            // Wenn es "Stunden erhalten" ist -> Hauptseite
-            showView('view-input', document.querySelectorAll('.nav-item')[0], 'Eingabe');
-            document.getElementById('date-start-time').value = e.isoStart;
-            document.getElementById('date-end-time').value = e.isoEnd;
-            const times = e.timeDesc.match(/(\d{2}:\d{2})/g); 
-            if(times && times.length >= 2) {
-                 document.getElementById('time-start').value = times[0];
-                 document.getElementById('time-end').value = times[1];
-            }
-            document.getElementById('hours-manual-val').value = e.hours;
-            document.getElementById('inp-note').value = e.note || "";
-            
-            currentEditId = id; document.getElementById('btn-save-main').innerText = "Änderung speichern";
-            document.getElementById('edit-mode-hint').style.display = 'block';
+            // Alles andere -> Kalender Modal
+             closeListView({target:{id:'list-view-modal'}}); 
+             showView('view-calendar', document.querySelectorAll('.nav-item')[1], 'Kalender');
+             modalCurrentIsoDate = e.isoStart; 
+             openModal(e.isoStart, getEventsForDate(e.isoStart));
+             setTimeout(() => {
+                 document.getElementById('modal-date-start').value = e.isoStart; 
+                 document.getElementById('modal-date-end').value = e.isoEnd;
+                 const times = e.timeDesc.match(/(\d{2}:\d{2})/g); 
+                 if(times && times.length >= 1) document.getElementById('modal-time-start').value = times[0]; 
+                 if(times && times.length >= 2) document.getElementById('modal-time-end').value = times[1];
+                 
+                 document.getElementById('modal-note-input').value = e.note || "";
+                 if(e.cat === 'Stunden') {
+                     document.getElementById('modal-hours-input').value = e.hours;
+                     document.getElementById('modal-hours-container').classList.remove('hidden');
+                 }
+
+                 let btn = document.querySelector(`.cat-btn[data-cat="${e.cat}"]`);
+                 if(btn) btn.click();
+                 currentEditId = id; 
+             }, 200);
         }
 
         function deleteEntry(id) { 
@@ -431,23 +454,35 @@
         
         function renderStats() {
             const grid = document.getElementById('stats-grid'); grid.innerHTML = '';
-            const today = new Date().toISOString().slice(0,10);
-            const upcoming = entries.filter(e => { ensureIsoDates(e); return e.isoEnd >= today; }).sort((a,b) => a.isoStart.localeCompare(b.isoStart)).slice(0, 3);
-            let listHtml = upcoming.length ? '' : '<li class="upcoming-item" style="color:#666; justify-content:center;">Keine Termine</li>';
-            upcoming.forEach(u => {
-                let icon = u.icon || '•';
-                listHtml += `<li class="upcoming-item" onclick="jumpToDate('${u.isoStart}')"><div style="display:flex;align-items:center;"><span class="u-icon">${icon}</span><div style="display:flex;flex-direction:column;"><span style="font-weight:bold;">${u.cat}</span><span style="font-size:10px;color:#888;">${u.note||""}</span></div></div><span class="u-meta">${formatDateDE(u.isoStart).slice(0,6)}</span></li>`;
-            });
-            let upBox = document.createElement('div'); upBox.className = 'stat-box full-width'; upBox.innerHTML = `<h4>Nächste Termine</h4><ul class="upcoming-list" style="margin:0;padding:0;">${listHtml}</ul>`; grid.appendChild(upBox);
-
+            
+            // Zusammenfassung KOMPAKT
             let tDays = 0, tHours = 0;
             entries.forEach(e => { let v = (e.mode==='taken') ? -e.hours : e.hours; if(['Urlaub','DA','Sonderurlaub'].includes(e.cat)) tDays += v; else if(['Stunden','Langzeitkonto'].includes(e.cat)) tHours += v; });
-            grid.innerHTML += `<div class="stat-box summary"><h4>∑ Tage</h4><span style="color:${tDays>=0?'#fff':'#ff453a'}">${formatNumber(tDays/8)}<span class="unit">Ges</span></span></div><div class="stat-box summary"><h4>∑ Stunden</h4><span style="color:${tHours>=0?'#fff':'#ff453a'}">${formatNumber(tHours)}<span class="unit">Ges</span></span></div>`;
+            grid.innerHTML += `<div class="stat-box summary">
+                <div><h4>∑ Tage</h4><span style="color:${tDays>=0?'#fff':'#ff453a'}">${formatNumber(tDays/8)}<span class="unit">Ges</span></span></div>
+                <div><h4>∑ Stunden</h4><span style="color:${tHours>=0?'#fff':'#ff453a'}">${formatNumber(tHours)}<span class="unit">Ges</span></span></div>
+            </div>`;
+
+            // 6 Boxen in 3 Spalten (Kompakt)
             [{n:'Urlaub',u:'Tage'},{n:'Stunden',u:'Std'},{n:'Kindkrank',u:'Tage'},{n:'DA',u:'Tage'},{n:'Langzeitkonto',u:'Std'},{n:'Sonderurlaub',u:'Tage'}].forEach(c => {
                  let s = 0; entries.filter(x=>x.cat===c.n).forEach(x => s += (x.mode==='earned'?x.hours:-x.hours)); let d = (c.u==='Tage') ? s/8 : s;
                  let bx = document.createElement('div'); bx.className='stat-box'; bx.innerHTML = `<div class="edit-icon">✎</div><h4>${c.n}</h4><span style="color:${d>=0?'#fff':'#ff453a'}">${formatNumber(d)}<span class="unit">${c.u}</span></span>`; bx.onclick = () => adjustStat(c.n, s, c.u); grid.appendChild(bx);
             });
+            
+            // Upcoming Events (Kompakt)
+            const today = new Date().toISOString().slice(0,10);
+            const upcoming = entries.filter(e => { ensureIsoDates(e); return e.isoEnd >= today; }).sort((a,b) => a.isoStart.localeCompare(b.isoStart)).slice(0, 3);
+            let listHtml = upcoming.length ? '' : '<div style="font-size:11px; color:#666;">Keine Termine</div>';
+            upcoming.forEach(u => {
+                let icon = '';
+                if(u.cat === 'Stunden') { icon = (u.mode==='earned')?'➕':'⏰'; } 
+                else if(u.icon) icon = u.icon; else icon='•';
+                
+                listHtml += `<div class="upcoming-item" style="padding:6px 10px; margin-bottom:4px;"><span class="u-icon" style="font-size:12px; width:15px;">${icon}</span><span style="font-size:12px; flex:1;">${u.cat}</span><span style="font-size:11px; color:#888;">${formatDateDE(u.isoStart).slice(0,6)}</span></div>`;
+            });
+            let upBox = document.createElement('div'); upBox.className = 'stat-box full-width'; upBox.innerHTML = `<h4>Nächste Termine</h4>${listHtml}`; grid.appendChild(upBox);
         }
+
         function adjustStat(name, curr, unit) {
              let n = prompt(`Neuer Stand für ${name} (${unit}):`); if(n===null) return; let val = parseFloat(n.replace(',','.')); if(isNaN(val)) return;
              let diff = (unit==='Tage' ? val*8 : val) - curr; if(diff===0) return;
@@ -483,10 +518,17 @@
                     
                     showEvs.forEach(e => {
                         let icon = e.icon; 
-                        if(!icon && CAT_CONFIG[e.cat]) icon = CAT_CONFIG[e.cat].icon;
+                        
+                        // HIER: SPEZIAL LOGIK FÜR STUNDEN ICONS
+                        if(e.cat === 'Stunden') {
+                            if(e.mode === 'earned') icon = '➕';
+                            else icon = '⏰';
+                        }
+                        else if(!icon && CAT_CONFIG[e.cat]) icon = CAT_CONFIG[e.cat].icon;
+                        
                         if(icon) dots += `<span class="event-icon">${icon}</span>`;
                         else { 
-                             let c = '#555'; if(e.cat === 'Stunden') c = 'var(--c-stunden)';
+                             let c = '#555'; 
                              dots += `<div class="event-dot" style="background:${c}"></div>`;
                         }
                     });
@@ -534,7 +576,10 @@
             
             filtered.forEach(e => {
                  if(e.note==="Manuelle Korrektur Statistik") return;
-                 let icon = e.icon || '•';
+                 let icon = '';
+                 if(e.cat==='Stunden') icon = e.mode==='earned'?'➕':'⏰';
+                 else icon = e.icon || '•';
+
                  let desc = e.cat;
                  let sub = `${e.date} | ${e.timeDesc}`;
                  list.innerHTML += `<div class="list-view-item future"><div class="lv-icon">${icon}</div><div class="lv-info" onclick="jumpToDate('${e.isoStart}')"><div class="lv-title">${desc}</div><div class="lv-meta">${sub}</div></div><button class="h-action-btn" onclick="editEntry(${e.id})">✎</button></div>`;
@@ -552,13 +597,19 @@
             
             events.forEach(e => {
                 let col = '#fff';
-                if(['Urlaub','DA','Kindkrank','Sonderurlaub'].includes(e.cat)) col = 'var(--c-urlaub)';
-                else if(['Stunden','Langzeitkonto'].includes(e.cat)) col = 'var(--c-stunden)';
+                let displayIcon = e.icon;
+                if(e.cat === 'Stunden') {
+                    if(e.mode === 'earned') displayIcon = '➕';
+                    else displayIcon = '⏰';
+                    col = 'var(--c-stunden)';
+                }
+                else if(['Urlaub','DA','Kindkrank','Sonderurlaub'].includes(e.cat)) col = 'var(--c-urlaub)';
+                else if(['Langzeitkonto'].includes(e.cat)) col = 'var(--c-lzk)';
                 
                 body.innerHTML += `
                     <div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px solid #333; padding-bottom:5px;">
                         <div>
-                            <div style="font-weight:bold; color:${col}; font-size:14px;">${e.icon} ${e.cat}</div>
+                            <div style="font-weight:bold; color:${col}; font-size:14px;">${displayIcon} ${e.cat}</div>
                             <div style="font-size:12px; color:#aaa">${e.timeDesc}</div>
                             ${e.note ? `<div style="font-size:11px;color:#888;font-style:italic;">${e.note}</div>` : ''}
                         </div>
@@ -587,7 +638,6 @@
             document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             
-            // Wenn im KALENDER Stunden gewählt wird -> Genommen (und Eingabefeld anzeigen)
             if(cat === 'Stunden') {
                 document.getElementById('modal-hours-container').classList.remove('hidden');
             } else {
@@ -613,11 +663,8 @@
             let hours = 0;
             if(modalSelected.type === 'taken') {
                 if(modalSelected.cat === 'Stunden') {
-                    // Manuelle Eingabe (Kalender)
                     let manualH = document.getElementById('modal-hours-input').value;
-                    if(manualH !== "") {
-                        hours = parseFloat(manualH);
-                    } else { hours = 0; }
+                    if(manualH !== "") { hours = parseFloat(manualH); } else { hours = 0; }
                 } else {
                     let count = 0, curr = new Date(ds), end = new Date(de);
                     while (curr <= end) { if (curr.getDay() !== 0 && curr.getDay() !== 6) count++; curr.setDate(curr.getDate() + 1); }
@@ -656,7 +703,7 @@
         function resetAll() { if(confirm("Reset?")) { localStorage.removeItem('trackData_v5'); entries=[]; updateUI(); } }
         function openSettings() { document.getElementById('settings-modal').classList.add('open'); const tb=document.getElementById('settings-tbody'); tb.innerHTML=''; [1,2,3,4,5,6,0].forEach(i=>{ let s=settings.schedule[i]; tb.innerHTML+=`<tr><td>${DAY_NAMES[i]}</td><td><input type="time" id="set-s-${i}" value="${s.s}"></td><td><input type="time" id="set-e-${i}" value="${s.e}"></td></tr>`; }); }
         function saveSettings() { for(let i=0;i<7;i++){ settings.schedule[i]={s:document.getElementById(`set-s-${i}`).value, e:document.getElementById(`set-e-${i}`).value}; } localStorage.setItem('trackSettings_v17', JSON.stringify(settings)); document.getElementById('settings-modal').classList.remove('open'); updateUI(); }
-        function exportData() { const b=new Blob([JSON.stringify({entries,settings})],{type:"application/json"}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download="backup_v41.json"; a.click(); }
+        function exportData() { const b=new Blob([JSON.stringify({entries,settings})],{type:"application/json"}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download="backup_v43.json"; a.click(); }
         function importData(inp) { const r=new FileReader(); r.onload=e=>{ let d=JSON.parse(e.target.result); if(Array.isArray(d)) entries=d; else { entries=d.entries; settings=d.settings; } localStorage.setItem('trackData_v5', JSON.stringify(entries)); updateUI(); }; r.readAsText(inp.files[0]); }
     </script>
 </body>
