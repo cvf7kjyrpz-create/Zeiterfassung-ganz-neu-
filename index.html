@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Arbeitszeit V44">
-    <title>Arbeitszeit Tracker V44</title>
+    <meta name="apple-mobile-web-app-title" content="Arbeitszeit V45">
+    <title>Arbeitszeit Tracker V45</title>
 
     <style>
         :root {
@@ -72,7 +72,7 @@
         .year-selector { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 18px; font-weight: bold; }
         .year-btn { background: none; border: none; color: var(--accent); font-size: 24px; cursor: pointer; padding: 0 20px; }
         
-        /* NEUES FILTER DROPDOWN */
+        /* UPDATE FILTER DROPDOWN: Scrollbar support */
         .filter-wrapper { position: relative; display: inline-block; }
         .filter-toggle-btn { 
             background: var(--card); border: 1px solid var(--card-border); color: var(--text-sub);
@@ -84,10 +84,11 @@
             position: absolute; top: 35px; right: 0; 
             background: #2c2c2e; border: 1px solid #444; border-radius: 10px; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 200;
-            display: none; flex-direction: column; min-width: 120px;
+            display: none; flex-direction: column; min-width: 160px;
+            max-height: 300px; overflow-y: auto; /* SCROLLBAR */
         }
         .filter-dropdown-menu.show { display: flex; }
-        .filter-option { padding: 10px 15px; color: #ddd; font-size: 13px; cursor: pointer; border-bottom: 1px solid #3a3a3c; }
+        .filter-option { padding: 12px 15px; color: #ddd; font-size: 13px; cursor: pointer; border-bottom: 1px solid #3a3a3c; }
         .filter-option:last-child { border-bottom: none; }
         .filter-option.selected { color: var(--accent); font-weight: bold; }
 
@@ -102,7 +103,6 @@
         .event-icon { font-size: 9px; line-height: 1; text-shadow: 0 0 2px black;}
         .event-dot { width: 5px; height: 5px; border-radius: 50%; background-color: #555; }
 
-        /* Modal */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 1000; display: none; justify-content: center; align-items: center; }
         .modal-overlay.open { display: flex; }
         .modal-content { background: #1c1c1e; width: 90%; max-width: 380px; padding: 20px; border-radius: 18px; border: 1px solid #333; box-shadow: 0 20px 40px rgba(0,0,0,0.6); max-height: 85vh; overflow-y: auto; }
@@ -110,7 +110,6 @@
         .modal-title { font-size: 17px; font-weight: 700; }
         .close-btn { background: none; border: none; font-size: 28px; color: #888; cursor: pointer; line-height: 1; }
         
-        /* REMINDER MODAL SPEZIAL */
         .reminder-box { text-align: center; padding: 10px 0; }
         .reminder-icon { font-size: 40px; margin-bottom: 10px; display: block; }
         .reminder-text { font-size: 16px; margin-bottom: 20px; line-height: 1.4; }
@@ -192,9 +191,19 @@
                          <div class="filter-dropdown-menu" id="filter-menu">
                              <div class="filter-option selected" onclick="applyFilter('all', 'Alle')">Alle</div>
                              <div class="filter-option" onclick="applyFilter('Urlaub', 'Urlaub')">Urlaub</div>
-                             <div class="filter-option" onclick="applyFilter('Stunden', 'Stunden')">Stunden</div>
-                             <div class="filter-option" onclick="applyFilter('Dienst', 'Dienst')">Dienst</div>
-                             <div class="filter-option" onclick="applyFilter('Termine', 'Termine')">Termine</div>
+                             <div class="filter-option" onclick="applyFilter('StundenTaken', 'Stunden (Genommen)')">Stunden (Genommen)</div>
+                             <div class="filter-option" onclick="applyFilter('StundenEarned', 'Stunden (Bekommen)')">Stunden (Bekommen)</div>
+                             <div class="filter-option" onclick="applyFilter('Arzttermin', 'Arzt')">Arzt</div>
+                             <div class="filter-option" onclick="applyFilter('Ausbildung', 'Ausbildung')">Ausbildung</div>
+                             <div class="filter-option" onclick="applyFilter('Übungsplatz', 'Übungsplatz')">Übungsplatz</div>
+                             <div class="filter-option" onclick="applyFilter('UvD', 'UvD')">UvD</div>
+                             <div class="filter-option" onclick="applyFilter('UvD Standort', 'UvD Standort')">UvD Standort</div>
+                             <div class="filter-option" onclick="applyFilter('KvD', 'KvD')">KvD</div>
+                             <div class="filter-option" onclick="applyFilter('DA', 'DA')">DA</div>
+                             <div class="filter-option" onclick="applyFilter('Langzeitkonto', 'LZK')">LZK</div>
+                             <div class="filter-option" onclick="applyFilter('Sonderurlaub', 'Sonderurlaub')">Sonderurlaub</div>
+                             <div class="filter-option" onclick="applyFilter('Kindkrank', 'Kindkrank')">Kindkrank</div>
+                             <div class="filter-option" onclick="applyFilter('Sonstiges', 'Sonstiges')">Sonstiges</div>
                          </div>
                      </div>
                 </div>
@@ -310,7 +319,7 @@
         let calendarFilter = 'all'; 
         let modalCurrentIsoDate = null; 
         let currentEditId = null; 
-        let activeReminders = []; // Queue für Erinnerungen
+        let activeReminders = []; 
         
         let modalSelected = { cat: '', icon: '', type: '' };
 
@@ -336,67 +345,73 @@
             const today = new Date().toISOString().slice(0,10);
             ['date-start-time','date-end-time','modal-date-start','modal-date-end'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = today; });
             updateUI();
-            checkReminders(); // Neue Funktion beim Start
+            checkReminders(); 
         };
 
         function formatDateDE(isoDate) { if(!isoDate) return ""; const parts = isoDate.split('-'); return `${parts[2]}.${parts[1]}.${parts[0]}`; }
         function formatNumber(num) { return Number(num.toFixed(2)).toString(); }
         
-        // --- FILTER MENÜ LOGIK ---
-        function toggleFilterMenu() {
-            const m = document.getElementById('filter-menu');
-            m.classList.toggle('show');
-        }
+        // --- FILTER MENÜ ---
+        function toggleFilterMenu() { document.getElementById('filter-menu').classList.toggle('show'); }
         function applyFilter(f, label) {
             calendarFilter = f;
             document.getElementById('filter-btn-label').innerHTML = `Filter: ${label} <span>▾</span>`;
             document.getElementById('filter-menu').classList.remove('show');
             document.querySelectorAll('.filter-option').forEach(el => el.classList.remove('selected'));
-            // Highlight logic simpel halten
             renderCalendar();
         }
 
-        // --- ERINNERUNGS LOGIK ---
+        // --- INTELLIGENTE ERINNERUNGEN ---
         function checkReminders() {
             const today = new Date();
             today.setHours(0,0,0,0);
             activeReminders = [];
 
             entries.forEach(e => {
-                // Wenn Reminder schon erledigt ("dismissed"), überspringen
                 if(e.reminderDismissed) return;
 
-                const eventDate = new Date(e.isoStart);
-                eventDate.setHours(0,0,0,0);
+                const eventStart = new Date(e.isoStart); eventStart.setHours(0,0,0,0);
+                const eventEnd = new Date(e.isoEnd || e.isoStart); eventEnd.setHours(0,0,0,0);
                 
-                // Differenz in Tagen (Heute - Event)
-                // Positiv = Event war in Vergangenheit (Heute > Event)
-                // Negativ = Event ist in Zukunft (Heute < Event)
-                const diffTime = today - eventDate;
-                const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+                // Tage Differenz: (Event - Heute) -> Negativ = Vergangenheit, Positiv = Zukunft
+                // Wir brauchen: (Heute - Event) -> Positiv = Event war schon, Negativ = Event kommt noch
+                // Einfacher: DaysUntil = (Event - Today)
+                
+                const diffMs = eventStart - today;
+                const daysUntil = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+                
+                // Diff for "After" events (based on End date)
+                const diffMsAfter = today - eventEnd;
+                const daysSinceEnd = Math.floor(diffMsAfter / (1000 * 60 * 60 * 24));
 
-                // 1. UvD / KvD / Standort (1 Tag danach = diffDays 1)
-                if ((e.cat === 'UvD' || e.cat === 'KvD' || e.cat === 'UvD Standort') && diffDays === 1) {
-                    activeReminders.push({ id: e.id, text: "Stunden nachtragen?", icon: "⏰", date: e.date });
+                // 1. UvD / KvD / Standort (Ab 1 Tag danach)
+                if ((e.cat === 'UvD' || e.cat === 'KvD' || e.cat === 'UvD Standort') && daysSinceEnd >= 1) {
+                    activeReminders.push({ id: e.id, text: `Stunden für ${e.cat} am ${e.date} nachtragen?`, icon: "⏰", date: e.date });
                 }
                 
-                // 2. Arzt (1 Tag danach = diffDays 1)
-                if (e.cat === 'Arzttermin' && diffDays === 1) {
+                // 2. Arzt (Ab 1 Tag danach)
+                if (e.cat === 'Arzttermin' && daysSinceEnd >= 1) {
                     activeReminders.push({ id: e.id, text: "Beim Arzt gewesen?\nNeuer Termin vereinbart?", icon: "💉", date: e.date });
                 }
 
-                // 3. Urlaub / DA / LZK / Sonder (2 Wochen davor = diffDays -14)
-                if (['Urlaub','DA','Langzeitkonto','Sonderurlaub'].includes(e.cat) && diffDays === -14) {
-                    activeReminders.push({ id: e.id, text: `Antrag für ${e.cat} geschrieben?`, icon: "📝", date: e.date });
+                // 3. Urlaub / DA / LZK / Sonder (Ab 14 Tage davor)
+                // Also wenn es noch 14 Tage oder weniger sind (aber noch nicht vorbei)
+                // daysUntil <= 14 UND daysUntil > -1 (Event noch nicht komplett vorbei)
+                if (['Urlaub','DA','Langzeitkonto','Sonderurlaub'].includes(e.cat)) {
+                    if (daysUntil <= 14 && daysUntil > -5) { // Toleranzfenster
+                         activeReminders.push({ id: e.id, text: `Antrag für ${e.cat} geschrieben?`, icon: "📝", date: e.date });
+                    }
                 }
 
-                // 4. Stunden genommen (5 Tage davor = diffDays -5)
-                if (e.cat === 'Stunden' && e.mode === 'taken' && diffDays === -5) {
-                    activeReminders.push({ id: e.id, text: "Stundenabbau beantragt/geschrieben?", icon: "⏳", date: e.date });
+                // 4. Stunden genommen (Ab 5 Tage davor)
+                if (e.cat === 'Stunden' && e.mode === 'taken') {
+                    if (daysUntil <= 5 && daysUntil > -2) {
+                        activeReminders.push({ id: e.id, text: "Stundenabbau beantragt/geschrieben?", icon: "⏳", date: e.date });
+                    }
                 }
 
-                // 5. Übungsplatz (3 Wochen danach = 21 Tage danach = diffDays 21)
-                if (e.cat === 'Übungsplatz' && diffDays === 21) {
+                // 5. Übungsplatz (Ab 21 Tage danach)
+                if (e.cat === 'Übungsplatz' && daysSinceEnd >= 21) {
                     activeReminders.push({ id: e.id, text: "Stunden oder DA dafür erhalten?", icon: "💰", date: e.date });
                 }
             });
@@ -419,102 +434,51 @@
         function handleReminder(isDone) {
             const current = activeReminders[0];
             if (isDone) {
-                // Als erledigt markieren in LocalStorage
                 const idx = entries.findIndex(e => e.id === current.id);
                 if(idx !== -1) {
                     entries[idx].reminderDismissed = true;
                     localStorage.setItem('trackData_v5', JSON.stringify(entries));
                 }
             }
-            // Aus Queue entfernen (bei "Nein" kommt es beim nächsten App-Start wieder, da nicht gespeichert)
             activeReminders.shift();
             showNextReminder();
         }
 
-        // --- HAUPTSEITE ---
+        // --- CORE FUNCTIONS ---
         function saveEntry() {
-            const cat = 'Stunden'; 
-            const mode = 'earned';
-            
-            const ds = document.getElementById('date-start-time').value;
-            const de = document.getElementById('date-end-time').value;
-            const note = document.getElementById('inp-note').value;
-            
-            if(!ds) { alert('Datum fehlt'); return; }
-            if(!de) { document.getElementById('date-end-time').value = ds; }
-            
-            let manualH = document.getElementById('hours-manual-val').value;
-            if(manualH === "") { alert('Bitte Stunden eingeben (oder 0)'); return; }
+            const cat = 'Stunden'; const mode = 'earned';
+            const ds = document.getElementById('date-start-time').value; const de = document.getElementById('date-end-time').value; const note = document.getElementById('inp-note').value;
+            if(!ds) { alert('Datum fehlt'); return; } if(!de) { document.getElementById('date-end-time').value = ds; }
+            let manualH = document.getElementById('hours-manual-val').value; if(manualH === "") { alert('Bitte Stunden eingeben (oder 0)'); return; }
             let hoursVal = parseFloat(manualH);
-            
             let dispDate = (ds===de || !de) ? formatDateDE(ds) : `${formatDateDE(ds)} - ${formatDateDE(de)}`; 
             let dispTime = `${document.getElementById('time-start').value} - ${document.getElementById('time-end').value}`; 
-            
             if(currentEditId) { entries = entries.filter(e => e.id !== currentEditId); currentEditId = null; document.getElementById('btn-save-main').innerText = "Buchen"; document.getElementById('edit-mode-hint').style.display = 'none'; }
-            
             entries.unshift({ id: Date.now(), cat: cat, date: dispDate, isoStart: ds, isoEnd: de || ds, timeDesc: dispTime, hours: hoursVal, mode: mode, note: note, color: null, icon: '➕' });
             localStorage.setItem('trackData_v5', JSON.stringify(entries)); alert('Gespeichert'); updateUI();
-            
-            document.getElementById('hours-manual-val').value = "";
-            document.getElementById('inp-note').value = "";
+            document.getElementById('hours-manual-val').value = ""; document.getElementById('inp-note').value = "";
         }
 
-        // --- BEARBEITEN ---
         function editEntry(id) {
             const e = entries.find(x => x.id === id); if(!e) return;
-            
             if(e.cat === 'Stunden' && e.mode === 'earned') {
                 showView('view-input', document.querySelectorAll('.nav-item')[0], 'Eingabe');
-                document.getElementById('date-start-time').value = e.isoStart;
-                document.getElementById('date-end-time').value = e.isoEnd;
-                const times = e.timeDesc.match(/(\d{2}:\d{2})/g); 
-                if(times && times.length >= 2) {
-                     document.getElementById('time-start').value = times[0];
-                     document.getElementById('time-end').value = times[1];
-                }
-                document.getElementById('hours-manual-val').value = e.hours;
-                document.getElementById('inp-note').value = e.note || "";
-                
-                currentEditId = id; document.getElementById('btn-save-main').innerText = "Änderung speichern";
-                document.getElementById('edit-mode-hint').style.display = 'block';
-                return;
+                document.getElementById('date-start-time').value = e.isoStart; document.getElementById('date-end-time').value = e.isoEnd;
+                const times = e.timeDesc.match(/(\d{2}:\d{2})/g); if(times && times.length >= 2) { document.getElementById('time-start').value = times[0]; document.getElementById('time-end').value = times[1]; }
+                document.getElementById('hours-manual-val').value = e.hours; document.getElementById('inp-note').value = e.note || "";
+                currentEditId = id; document.getElementById('btn-save-main').innerText = "Änderung speichern"; document.getElementById('edit-mode-hint').style.display = 'block'; return;
             }
-
-             closeListView({target:{id:'list-view-modal'}}); 
-             showView('view-calendar', document.querySelectorAll('.nav-item')[1], 'Kalender');
-             modalCurrentIsoDate = e.isoStart; 
-             openModal(e.isoStart, getEventsForDate(e.isoStart));
+             closeListView({target:{id:'list-view-modal'}}); showView('view-calendar', document.querySelectorAll('.nav-item')[1], 'Kalender'); modalCurrentIsoDate = e.isoStart; openModal(e.isoStart, getEventsForDate(e.isoStart));
              setTimeout(() => {
-                 document.getElementById('modal-date-start').value = e.isoStart; 
-                 document.getElementById('modal-date-end').value = e.isoEnd;
-                 const times = e.timeDesc.match(/(\d{2}:\d{2})/g); 
-                 if(times && times.length >= 1) document.getElementById('modal-time-start').value = times[0]; 
-                 if(times && times.length >= 2) document.getElementById('modal-time-end').value = times[1];
-                 
+                 document.getElementById('modal-date-start').value = e.isoStart; document.getElementById('modal-date-end').value = e.isoEnd;
+                 const times = e.timeDesc.match(/(\d{2}:\d{2})/g); if(times && times.length >= 1) document.getElementById('modal-time-start').value = times[0]; if(times && times.length >= 2) document.getElementById('modal-time-end').value = times[1];
                  document.getElementById('modal-note-input').value = e.note || "";
-                 if(e.cat === 'Stunden') {
-                     document.getElementById('modal-hours-input').value = e.hours;
-                     document.getElementById('modal-hours-container').classList.remove('hidden');
-                 }
-
-                 let btn = document.querySelector(`.cat-btn[data-cat="${e.cat}"]`);
-                 if(btn) btn.click();
-                 currentEditId = id; 
+                 if(e.cat === 'Stunden') { document.getElementById('modal-hours-input').value = e.hours; document.getElementById('modal-hours-container').classList.remove('hidden'); }
+                 let btn = document.querySelector(`.cat-btn[data-cat="${e.cat}"]`); if(btn) btn.click(); currentEditId = id; 
              }, 200);
         }
 
-        function deleteEntry(id) { 
-            if(confirm("Löschen?")) { 
-                entries = entries.filter(e => e.id !== id); 
-                localStorage.setItem('trackData_v5', JSON.stringify(entries)); 
-                updateUI(); 
-                if(document.getElementById('day-modal').classList.contains('open')) { 
-                    const evs = getEventsForDate(modalCurrentIsoDate); 
-                    openModal(modalCurrentIsoDate, evs); 
-                } 
-            } 
-        }
-        
+        function deleteEntry(id) { if(confirm("Löschen?")) { entries = entries.filter(e => e.id !== id); localStorage.setItem('trackData_v5', JSON.stringify(entries)); updateUI(); if(document.getElementById('day-modal').classList.contains('open')) { const evs = getEventsForDate(modalCurrentIsoDate); openModal(modalCurrentIsoDate, evs); } } }
         function updateUI() { renderHistory(); renderStats(); renderCalendar(); }
         function ensureIsoDates(e) { if(e.isoStart) return; }
 
@@ -525,41 +489,32 @@
                 let colorClass = ''; let customStyle = '';
                 if(e.cat.startsWith('Urlaub')) colorClass = 'cat-urlaub'; else if(e.cat.startsWith('Stunden')) colorClass = 'cat-stunden'; else if(e.cat.startsWith('Kind')) colorClass = 'cat-krank'; else if(e.cat.startsWith('DA')) colorClass = 'cat-da'; else if(e.cat.startsWith('Lang')) colorClass = 'cat-lzk'; else if(e.cat.startsWith('Sonder')) colorClass = 'cat-sonder'; else customStyle='border-left: 4px solid #555;';
                 let valClass = e.mode === 'taken' ? 'neg' : 'pos'; let sign = e.mode === 'taken' ? '-' : '+'; let displayVal = "";
-                if(e.hours > 0 || (e.hours === 0 && e.cat === 'Stunden')) {
-                     if (['Urlaub','Kindkrank','DA','Sonderurlaub'].includes(e.cat)) displayVal = formatNumber(e.hours / 8) + " d"; else displayVal = formatNumber(e.hours) + " h";
-                } else { displayVal = ""; sign = ""; }
-                
+                if(e.hours > 0 || (e.hours === 0 && e.cat === 'Stunden')) { if (['Urlaub','Kindkrank','DA','Sonderurlaub'].includes(e.cat)) displayVal = formatNumber(e.hours / 8) + " d"; else displayVal = formatNumber(e.hours) + " h"; } else { displayVal = ""; sign = ""; }
                 let note = e.note ? `<div style="font-size:12px;color:#aaa;font-style:italic;">${e.note}</div>` : '';
-                let desc = e.cat; 
-
-                list.innerHTML += `<div class="history-item ${colorClass}" style="${customStyle}"><div class="h-content"><div class="h-top"><div><div class="h-title">${desc}</div><div class="h-meta">${e.date} | ${e.timeDesc}</div>${note}</div><div class="h-val ${valClass}">${sign} ${displayVal}</div></div></div><div class="h-btn-group"><button class="h-action-btn" onclick="editEntry(${e.id})">✎</button><button class="h-action-btn" onclick="deleteEntry(${e.id})" style="color:#FF453A;">🗑️</button></div></div>`;
+                list.innerHTML += `<div class="history-item ${colorClass}" style="${customStyle}"><div class="h-content"><div class="h-top"><div><div class="h-title">${e.cat}</div><div class="h-meta">${e.date} | ${e.timeDesc}</div>${note}</div><div class="h-val ${valClass}">${sign} ${displayVal}</div></div></div><div class="h-btn-group"><button class="h-action-btn" onclick="editEntry(${e.id})">✎</button><button class="h-action-btn" onclick="deleteEntry(${e.id})" style="color:#FF453A;">🗑️</button></div></div>`;
             });
         }
         
         function renderStats() {
             const grid = document.getElementById('stats-grid'); grid.innerHTML = '';
-            
             let tDays = 0, tHours = 0;
             entries.forEach(e => { let v = (e.mode==='taken') ? -e.hours : e.hours; if(['Urlaub','DA','Sonderurlaub'].includes(e.cat)) tDays += v; else if(['Stunden','Langzeitkonto'].includes(e.cat)) tHours += v; });
-            grid.innerHTML += `<div class="stat-box summary">
-                <div><h4>∑ Tage</h4><span style="color:${tDays>=0?'#fff':'#ff453a'}">${formatNumber(tDays/8)}<span class="unit">Ges</span></span></div>
-                <div><h4>∑ Stunden</h4><span style="color:${tHours>=0?'#fff':'#ff453a'}">${formatNumber(tHours)}<span class="unit">Ges</span></span></div>
-            </div>`;
-
+            grid.innerHTML += `<div class="stat-box summary"><div><h4>∑ Tage</h4><span style="color:${tDays>=0?'#fff':'#ff453a'}">${formatNumber(tDays/8)}<span class="unit">Ges</span></span></div><div><h4>∑ Stunden</h4><span style="color:${tHours>=0?'#fff':'#ff453a'}">${formatNumber(tHours)}<span class="unit">Ges</span></span></div></div>`;
             [{n:'Urlaub',u:'Tage'},{n:'Stunden',u:'Std'},{n:'Kindkrank',u:'Tage'},{n:'DA',u:'Tage'},{n:'Langzeitkonto',u:'Std'},{n:'Sonderurlaub',u:'Tage'}].forEach(c => {
                  let s = 0; entries.filter(x=>x.cat===c.n).forEach(x => s += (x.mode==='earned'?x.hours:-x.hours)); let d = (c.u==='Tage') ? s/8 : s;
                  let bx = document.createElement('div'); bx.className='stat-box'; bx.innerHTML = `<div class="edit-icon">✎</div><h4>${c.n}</h4><span style="color:${d>=0?'#fff':'#ff453a'}">${formatNumber(d)}<span class="unit">${c.u}</span></span>`; bx.onclick = () => adjustStat(c.n, s, c.u); grid.appendChild(bx);
             });
             
+            // NEXT 5
             const today = new Date().toISOString().slice(0,10);
-            const upcoming = entries.filter(e => { ensureIsoDates(e); return e.isoEnd >= today; }).sort((a,b) => a.isoStart.localeCompare(b.isoStart)).slice(0, 3);
+            const upcoming = entries.filter(e => { ensureIsoDates(e); return e.isoEnd >= today; }).sort((a,b) => a.isoStart.localeCompare(b.isoStart)).slice(0, 5); // 5 ITEMS
             let listHtml = upcoming.length ? '' : '<div style="font-size:11px; color:#666;">Keine Termine</div>';
             upcoming.forEach(u => {
                 let icon = '';
-                if(u.cat === 'Stunden') { icon = (u.mode==='earned')?'➕':'⏰'; } 
-                else if(u.icon) icon = u.icon; else icon='•';
-                
-                listHtml += `<div class="upcoming-item" style="padding:6px 10px; margin-bottom:4px;"><span class="u-icon" style="font-size:12px; width:15px;">${icon}</span><span style="font-size:12px; flex:1;">${u.cat}</span><span style="font-size:11px; color:#888;">${formatDateDE(u.isoStart).slice(0,6)}</span></div>`;
+                if(u.cat === 'Stunden') { icon = (u.mode==='earned')?'➕':'⏰'; } else if(u.icon) icon = u.icon; else icon='•';
+                // NOTE ANZEIGE
+                let noteHtml = u.note ? `<div style="font-size:10px; color:#aaa; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;">${u.note}</div>` : '';
+                listHtml += `<div class="upcoming-item" style="padding:6px 10px; margin-bottom:4px; display:block;"><div style="display:flex; justify-content:space-between; align-items:center;"><span style="display:flex; align-items:center;"><span class="u-icon" style="font-size:12px; width:15px;">${icon}</span><span style="font-size:12px;">${u.cat}</span></span><span style="font-size:11px; color:#888;">${formatDateDE(u.isoStart).slice(0,6)}</span></div>${noteHtml}</div>`;
             });
             let upBox = document.createElement('div'); upBox.className = 'stat-box full-width'; upBox.innerHTML = `<h4>Nächste Termine</h4>${listHtml}`; grid.appendChild(upBox);
         }
@@ -571,49 +526,27 @@
              localStorage.setItem('trackData_v5', JSON.stringify(entries)); updateUI();
         }
 
-        // --- KALENDER RENDER ---
         function renderCalendar() {
-            document.getElementById('calendar-year-display').innerText = currentCalYear; 
-            const root = document.getElementById('calendar-root'); root.innerHTML = ''; 
-            const now = new Date();
-            
+            document.getElementById('calendar-year-display').innerText = currentCalYear; const root = document.getElementById('calendar-root'); root.innerHTML = ''; const now = new Date();
             for (let i = 0; i < 12; i++) {
-                const md = document.createElement('div'); md.className = 'month-card'; 
-                if(currentCalYear === now.getFullYear() && i === now.getMonth()) md.id = 'current-month-card';
+                const md = document.createElement('div'); md.className = 'month-card'; if(currentCalYear === now.getFullYear() && i === now.getMonth()) md.id = 'current-month-card';
                 md.innerHTML = `<div class="month-name">${["Jan","Feb","Mär","Apr","Mai","Jun","Jul","Aug","Sep","Okt","Nov","Dez"][i]}</div>`;
-                const dg = document.createElement('div'); dg.className = 'days-grid'; 
-                ["M","D","M","D","F","S","S"].forEach(t => dg.innerHTML+=`<div class="day-label">${t}</div>`);
-                
+                const dg = document.createElement('div'); dg.className = 'days-grid'; ["M","D","M","D","F","S","S"].forEach(t => dg.innerHTML+=`<div class="day-label">${t}</div>`);
                 const first = new Date(currentCalYear, i, 1).getDay(); const days = new Date(currentCalYear, i+1, 0).getDate();
                 for(let j=0; j<(first===0?6:first-1); j++) dg.innerHTML+=`<div class="day-cell empty"></div>`;
-                
                 for(let d=1; d<=days; d++) {
                     const iso = `${currentCalYear}-${(i+1).toString().padStart(2,'0')}-${d.toString().padStart(2,'0')}`;
                     const evs = getEventsForDate(iso); 
-                    const cell = document.createElement('div'); cell.className = 'day-cell';
-                    if(evs.length) cell.classList.add('has-event');
-                    
-                    let dots = '';
-                    let limit = 4; // Max Icons
-                    let showEvs = evs.slice(0, limit);
-                    
+                    const cell = document.createElement('div'); cell.className = 'day-cell'; if(evs.length) cell.classList.add('has-event');
+                    let dots = ''; let limit = 4; let showEvs = evs.slice(0, limit);
                     showEvs.forEach(e => {
                         let icon = e.icon; 
-                        if(e.cat === 'Stunden') {
-                            if(e.mode === 'earned') icon = '➕';
-                            else icon = '⏰';
-                        }
-                        else if(!icon && CAT_CONFIG[e.cat]) icon = CAT_CONFIG[e.cat].icon;
-                        if(icon) dots += `<span class="event-icon">${icon}</span>`;
-                        else { let c = '#555'; dots += `<div class="event-dot" style="background:${c}"></div>`; }
+                        if(e.cat === 'Stunden') { if(e.mode === 'earned') icon = '➕'; else icon = '⏰'; } else if(!icon && CAT_CONFIG[e.cat]) icon = CAT_CONFIG[e.cat].icon;
+                        if(icon) dots += `<span class="event-icon">${icon}</span>`; else { let c = '#555'; dots += `<div class="event-dot" style="background:${c}"></div>`; }
                     });
                     if(evs.length > limit) dots += `<span style="font-size:8px; line-height:1;">+</span>`;
-                    
-                    cell.innerHTML = `<span>${d}</span><div class="event-dots">${dots}</div>`; 
-                    cell.onclick = () => openModal(iso, evs); 
-                    dg.appendChild(cell);
-                }
-                md.appendChild(dg); root.appendChild(md);
+                    cell.innerHTML = `<span>${d}</span><div class="event-dots">${dots}</div>`; cell.onclick = () => openModal(iso, evs); dg.appendChild(cell);
+                } md.appendChild(dg); root.appendChild(md);
             }
         }
         function changeYear(d) { currentCalYear += d; renderCalendar(); }
@@ -623,10 +556,14 @@
                 ensureIsoDates(e); if(!e.isoStart) return false;
                 let inRange = (iso >= e.isoStart && iso <= e.isoEnd);
                 if(!inRange) return false;
-
                 if(calendarFilter==='all') return true;
-                if(calendarFilter==='Urlaub') return e.cat.includes('Urlaub');
-                if(calendarFilter==='Stunden') return e.cat.includes('Stunden');
+                if(calendarFilter==='StundenTaken') return e.cat === 'Stunden' && e.mode === 'taken';
+                if(calendarFilter==='StundenEarned') return e.cat === 'Stunden' && e.mode === 'earned';
+                // Direkte Übereinstimmung für die spezifischen Kategorien
+                if(['Urlaub','Arzttermin','Ausbildung','Übungsplatz','UvD','UvD Standort','KvD','DA','Langzeitkonto','Sonderurlaub','Kindkrank','Sonstiges'].includes(calendarFilter)) {
+                    return e.cat === calendarFilter;
+                }
+                // Fallback (z.B. Dienst)
                 if(calendarFilter==='Dienst') return (e.cat === 'UvD' || e.cat === 'KvD' || e.cat.includes('Standort'));
                 if(calendarFilter==='Termine') return (e.cat === 'Arzttermin' || e.cat === 'Übungsplatz' || e.cat === 'Sonstiges');
                 return true;
@@ -637,18 +574,12 @@
         function openListModal() {
             const list = document.getElementById('list-view-body'); list.innerHTML = '';
             const today = new Date().toISOString().slice(0,10);
-            
             const filtered = entries.filter(e => { ensureIsoDates(e); return e.isoEnd >= today; }).sort((a,b) => a.isoStart.localeCompare(b.isoStart));
             if(!filtered.length) list.innerHTML = '<div style="text-align:center;padding:20px;color:#666">Keine kommenden Einträge</div>';
-            
             filtered.forEach(e => {
                  if(e.note==="Manuelle Korrektur Statistik") return;
-                 let icon = '';
-                 if(e.cat==='Stunden') icon = e.mode==='earned'?'➕':'⏰';
-                 else icon = e.icon || '•';
-
-                 let desc = e.cat;
-                 let sub = `${e.date} | ${e.timeDesc}`;
+                 let icon = ''; if(e.cat==='Stunden') icon = e.mode==='earned'?'➕':'⏰'; else icon = e.icon || '•';
+                 let desc = e.cat; let sub = `${e.date} | ${e.timeDesc}`;
                  list.innerHTML += `<div class="list-view-item future"><div class="lv-icon">${icon}</div><div class="lv-info" onclick="jumpToDate('${e.isoStart}')"><div class="lv-title">${desc}</div><div class="lv-meta">${sub}</div></div><button class="h-action-btn" onclick="editEntry(${e.id})">✎</button></div>`;
             });
             document.getElementById('list-view-modal').classList.add('open');
@@ -661,32 +592,15 @@
             const body = document.getElementById('modal-body'); body.innerHTML = '';
             if(!events.length) body.innerHTML = '<div style="text-align:center;padding:5px;color:#666;font-size:12px;">Keine Einträge an diesem Tag</div>';
             events.forEach(e => {
-                let col = '#fff';
-                let displayIcon = e.icon;
-                if(e.cat === 'Stunden') {
-                    if(e.mode === 'earned') displayIcon = '➕'; else displayIcon = '⏰';
-                    col = 'var(--c-stunden)';
-                }
+                let col = '#fff'; let displayIcon = e.icon;
+                if(e.cat === 'Stunden') { if(e.mode === 'earned') displayIcon = '➕'; else displayIcon = '⏰'; col = 'var(--c-stunden)'; }
                 else if(['Urlaub','DA','Kindkrank','Sonderurlaub'].includes(e.cat)) col = 'var(--c-urlaub)';
                 else if(['Langzeitkonto'].includes(e.cat)) col = 'var(--c-lzk)';
-                
-                body.innerHTML += `
-                    <div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px solid #333; padding-bottom:5px;">
-                        <div>
-                            <div style="font-weight:bold; color:${col}; font-size:14px;">${displayIcon} ${e.cat}</div>
-                            <div style="font-size:12px; color:#aaa">${e.timeDesc}</div>
-                            ${e.note ? `<div style="font-size:11px;color:#888;font-style:italic;">${e.note}</div>` : ''}
-                        </div>
-                        <div style="display:flex; gap:10px;">
-                            <button style="background:none; border:none; font-size:16px; cursor:pointer;" onclick="editEntry(${e.id})">✎</button>
-                            <button style="background:none; border:none; color:#ff453a; font-size:16px; cursor:pointer;" onclick="deleteEntry(${e.id})">🗑️</button>
-                        </div>
-                    </div>`;
+                body.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px solid #333; padding-bottom:5px;"><div><div style="font-weight:bold; color:${col}; font-size:14px;">${displayIcon} ${e.cat}</div><div style="font-size:12px; color:#aaa">${e.timeDesc}</div>${e.note ? `<div style="font-size:11px;color:#888;font-style:italic;">${e.note}</div>` : ''}</div><div style="display:flex; gap:10px;"><button style="background:none; border:none; font-size:16px; cursor:pointer;" onclick="editEntry(${e.id})">✎</button><button style="background:none; border:none; color:#ff453a; font-size:16px; cursor:pointer;" onclick="deleteEntry(${e.id})">🗑️</button></div></div>`;
             });
             document.getElementById('modal-date-start').value = iso; document.getElementById('modal-date-end').value = iso;
             document.getElementById('modal-time-start').value = ""; document.getElementById('modal-time-end').value = ""; 
-            document.getElementById('modal-note-input').value = "";
-            document.getElementById('modal-hours-input').value = "";
+            document.getElementById('modal-note-input').value = ""; document.getElementById('modal-hours-input').value = "";
             document.getElementById('modal-hours-container').classList.add('hidden');
             document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('modal-selection-display').innerText = "Wähle eine Kategorie...";
@@ -698,8 +612,7 @@
             modalSelected = { cat, icon, type };
             document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            if(cat === 'Stunden') { document.getElementById('modal-hours-container').classList.remove('hidden'); } 
-            else { document.getElementById('modal-hours-container').classList.add('hidden'); }
+            if(cat === 'Stunden') { document.getElementById('modal-hours-container').classList.remove('hidden'); } else { document.getElementById('modal-hours-container').classList.add('hidden'); }
             document.getElementById('modal-selection-display').innerText = cat;
         }
 
@@ -708,43 +621,16 @@
             const ds = document.getElementById('modal-date-start').value; const de = document.getElementById('modal-date-end').value;
             const ts = document.getElementById('modal-time-start').value; const te = document.getElementById('modal-time-end').value;
             const note = document.getElementById('modal-note-input').value;
-            
             if(!ds || !de) { alert('Datum fehlt'); return; }
-            
-            let td = ""; 
-            if(ts && te) td = `${ts} - ${te} Uhr`; else if(ts) td = `${ts} Uhr`;
-            if (ds !== de) td += (td ? " " : "") + `(bis ${formatDateDE(de)})`;
-            if(!td) td = "Ganztägig";
-
+            let td = ""; if(ts && te) td = `${ts} - ${te} Uhr`; else if(ts) td = `${ts} Uhr`; if (ds !== de) td += (td ? " " : "") + `(bis ${formatDateDE(de)})`; if(!td) td = "Ganztägig";
             let hours = 0;
             if(modalSelected.type === 'taken') {
-                if(modalSelected.cat === 'Stunden') {
-                    let manualH = document.getElementById('modal-hours-input').value;
-                    if(manualH !== "") { hours = parseFloat(manualH); } else { hours = 0; }
-                } else {
-                    let count = 0, curr = new Date(ds), end = new Date(de);
-                    while (curr <= end) { if (curr.getDay() !== 0 && curr.getDay() !== 6) count++; curr.setDate(curr.getDate() + 1); }
-                    hours = count * 8;
-                }
+                if(modalSelected.cat === 'Stunden') { let manualH = document.getElementById('modal-hours-input').value; if(manualH !== "") { hours = parseFloat(manualH); } else { hours = 0; } } 
+                else { let count = 0, curr = new Date(ds), end = new Date(de); while (curr <= end) { if (curr.getDay() !== 0 && curr.getDay() !== 6) count++; curr.setDate(curr.getDate() + 1); } hours = count * 8; }
             }
-
             if(currentEditId) { entries = entries.filter(e => e.id !== currentEditId); currentEditId = null; }
-
-            entries.unshift({ 
-                id: Date.now(), 
-                cat: modalSelected.cat, 
-                date: (ds===de) ? formatDateDE(ds) : `${formatDateDE(ds)} - ${formatDateDE(de)}`,
-                isoStart: ds, isoEnd: de, 
-                timeDesc: td, 
-                hours: hours, 
-                mode: modalSelected.type, 
-                note: note, 
-                color: null,
-                icon: modalSelected.icon
-            });
-            localStorage.setItem('trackData_v5', JSON.stringify(entries)); 
-            openModal(modalCurrentIsoDate, getEventsForDate(modalCurrentIsoDate)); 
-            updateUI();
+            entries.unshift({ id: Date.now(), cat: modalSelected.cat, date: (ds===de) ? formatDateDE(ds) : `${formatDateDE(ds)} - ${formatDateDE(de)}`, isoStart: ds, isoEnd: de, timeDesc: td, hours: hours, mode: modalSelected.type, note: note, color: null, icon: modalSelected.icon });
+            localStorage.setItem('trackData_v5', JSON.stringify(entries)); openModal(modalCurrentIsoDate, getEventsForDate(modalCurrentIsoDate)); updateUI();
         }
 
         function closeModalDirect() { document.getElementById('day-modal').classList.remove('open'); }
@@ -759,7 +645,7 @@
         function resetAll() { if(confirm("Reset?")) { localStorage.removeItem('trackData_v5'); entries=[]; updateUI(); } }
         function openSettings() { document.getElementById('settings-modal').classList.add('open'); const tb=document.getElementById('settings-tbody'); tb.innerHTML=''; [1,2,3,4,5,6,0].forEach(i=>{ let s=settings.schedule[i]; tb.innerHTML+=`<tr><td>${DAY_NAMES[i]}</td><td><input type="time" id="set-s-${i}" value="${s.s}"></td><td><input type="time" id="set-e-${i}" value="${s.e}"></td></tr>`; }); }
         function saveSettings() { for(let i=0;i<7;i++){ settings.schedule[i]={s:document.getElementById(`set-s-${i}`).value, e:document.getElementById(`set-e-${i}`).value}; } localStorage.setItem('trackSettings_v17', JSON.stringify(settings)); document.getElementById('settings-modal').classList.remove('open'); updateUI(); }
-        function exportData() { const b=new Blob([JSON.stringify({entries,settings})],{type:"application/json"}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download="backup_v44.json"; a.click(); }
+        function exportData() { const b=new Blob([JSON.stringify({entries,settings})],{type:"application/json"}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download="backup_v45.json"; a.click(); }
         function importData(inp) { const r=new FileReader(); r.onload=e=>{ let d=JSON.parse(e.target.result); if(Array.isArray(d)) entries=d; else { entries=d.entries; settings=d.settings; } localStorage.setItem('trackData_v5', JSON.stringify(entries)); updateUI(); }; r.readAsText(inp.files[0]); }
     </script>
 </body>
