@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Arbeitszeit V40">
-    <title>Arbeitszeit Tracker V40</title>
+    <meta name="apple-mobile-web-app-title" content="Arbeitszeit V42">
+    <title>Arbeitszeit Tracker V42</title>
 
     <style>
         :root {
@@ -19,7 +19,7 @@
             --accent: #0A84FF;
             --btn-active: #3a3a3c;
             
-            /* Kategorie Farben */
+            /* Farben */
             --c-urlaub: #FF9F0A; 
             --c-stunden: #0A84FF;
             --c-krank: #FF453A;
@@ -27,32 +27,14 @@
             --c-lzk: #30D158;
             --c-sonder: #64D2FF;
 
-            /* Kalender Marker */
+            /* Kalender */
             --past: #FF453A;
             --future: #30D158;
         }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Helvetica, Arial, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            font-size: 14px;
-        }
-
-        header {
-            padding-top: max(10px, env(safe-area-inset-top));
-            padding-bottom: 10px;
-            background-color: var(--bg);
-            text-align: center;
-            border-bottom: 1px solid var(--card-border);
-            z-index: 100;
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Helvetica, Arial, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; font-size: 14px; }
+        
+        header { padding-top: max(10px, env(safe-area-inset-top)); padding-bottom: 10px; background-color: var(--bg); text-align: center; border-bottom: 1px solid var(--card-border); z-index: 100; }
         header h1 { margin: 0; font-size: 16px; font-weight: 600; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; }
 
         main { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 90px; }
@@ -70,12 +52,7 @@
         .btn-primary { background-color: var(--card-border); color: var(--accent); }
         .btn-list-view { width: 100%; padding: 10px; background: var(--accent); color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; margin-bottom: 10px; cursor: pointer; }
 
-        .toggle-container { display: flex; background: var(--card); border-radius: 8px; padding: 2px; margin-bottom: 15px; border: 1px solid var(--card-border); }
-        .toggle-btn { flex: 1; padding: 8px; text-align: center; font-weight: 500; font-size: 13px; border-radius: 6px; transition: 0.2s; cursor: pointer; }
-        .toggle-btn.active { background: #3a3a3c; color: #fff; }
-
-        .hidden { display: none !important; }
-
+        /* Listen */
         .history-item, .list-view-item, .upcoming-item { background-color: var(--card); padding: 12px 14px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #555; position: relative; display: flex; justify-content: space-between; align-items: center; }
         .cat-urlaub { border-left-color: var(--c-urlaub); }
         .cat-stunden { border-left-color: var(--c-stunden); }
@@ -94,6 +71,7 @@
         .h-btn-group { display: flex; gap: 10px; align-items: center; z-index: 10; position: relative; }
         .h-action-btn { background: #2c2c2e; border: 1px solid #444; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; }
 
+        /* Kalender */
         #cal-sticky-header { position: sticky; top: -15px; background-color: var(--bg); z-index: 50; padding-top: 15px; padding-bottom: 5px; margin-bottom: 10px; border-bottom: 1px solid var(--card-border); }
         .year-selector { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 18px; font-weight: bold; }
         .year-btn { background: none; border: none; color: var(--accent); font-size: 24px; cursor: pointer; padding: 0 20px; }
@@ -112,6 +90,7 @@
         .event-icon { font-size: 9px; line-height: 1; text-shadow: 0 0 2px black;}
         .event-dot { width: 5px; height: 5px; border-radius: 50%; background-color: #555; }
 
+        /* Modal */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 1000; display: none; justify-content: center; align-items: center; }
         .modal-overlay.open { display: flex; }
         .modal-content { background: #1c1c1e; width: 90%; max-width: 380px; padding: 20px; border-radius: 18px; border: 1px solid #333; box-shadow: 0 20px 40px rgba(0,0,0,0.6); max-height: 85vh; overflow-y: auto; }
@@ -127,6 +106,7 @@
 
         .lv-icon, .u-icon { font-size: 18px; width: 25px; text-align: center; margin-right: 10px; }
         
+        /* Stats & Tools */
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .stat-box { background-color: var(--card); padding: 8px 10px; border-radius: 8px; border: 1px solid var(--card-border); position: relative; cursor: pointer; }
         .stat-box h4 { margin: 0 0 2px; font-size: 10px; color: var(--text-sub); text-transform: uppercase; }
@@ -146,6 +126,8 @@
         .nav-item { flex: 1; display: flex; justify-content: center; align-items: center; color: #666; font-size: 22px; transition: color 0.2s; }
         .nav-item.active { color: var(--accent); }
         .view { display: none; } .view.active { display: block; }
+        
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
@@ -154,51 +136,26 @@
 
     <main>
         <div id="view-input" class="view active">
-            <div class="toggle-container" id="mode-toggle-group">
-                <div class="toggle-btn active" id="btn-taken" onclick="setMode('taken')">Genommen (-)</div>
-                <div class="toggle-btn" id="btn-earned" onclick="setMode('earned')">Erhalten (+)</div>
+            
+            <div style="margin-bottom:20px; color:#0A84FF; font-size:16px; font-weight:bold; text-align:center; padding-bottom:10px; border-bottom:1px solid #333;">
+                ⏰ Stunden gutschreiben
             </div>
 
             <div class="input-row">
+                <div class="input-col"><label>Vom Tag</label><input type="date" id="date-start-time"></div>
+                <div class="input-col"><label>Bis Tag</label><input type="date" id="date-end-time"></div>
+            </div>
+            
+            <div class="input-row">
+                <div class="input-col"><label>Von Uhrzeit</label><input type="time" id="time-start" value="00:00"></div>
+                <div class="input-col"><label>Bis Uhrzeit</label><input type="time" id="time-end" value="00:00"></div>
+            </div>
+            
+            <div class="input-row">
                 <div class="input-col">
-                    <label>Kategorie</label>
-                    <select id="inp-cat" onchange="updateForm()">
-                        <option value="Urlaub">Urlaub (Tage)</option>
-                        <option value="Stunden">Stunden / Überstunden</option>
-                        <option value="Kindkrank">Kindkrank (Tage)</option>
-                        <option value="DA">DA Dienstausgleich</option>
-                        <option value="Langzeitkonto">Langzeitkonto (Std)</option>
-                        <option value="Sonderurlaub">Sonderurlaub (Tage)</option>
-                    </select>
+                    <label>Anzahl Stunden (Manuell)</label>
+                    <input type="number" id="hours-manual-val" step="0.1" placeholder="z.B. 8 oder 0">
                 </div>
-            </div>
-
-            <div id="section-hours-manual" class="hidden">
-                <div style="margin-bottom:10px; color:#0A84FF; font-size:12px; font-weight:bold;">Stunden gutschreiben (Erhalten)</div>
-                <div class="input-row">
-                    <div class="input-col"><label>Vom Tag</label><input type="date" id="date-start-time"></div>
-                    <div class="input-col"><label>Bis Tag</label><input type="date" id="date-end-time"></div>
-                </div>
-                <div class="input-row">
-                    <div class="input-col"><label>Von</label><input type="time" id="time-start" value="00:00"></div>
-                    <div class="input-col"><label>Bis</label><input type="time" id="time-end" value="00:00"></div>
-                </div>
-                <div class="input-row">
-                    <div class="input-col">
-                        <label>Anzahl Stunden (Manuell)</label>
-                        <input type="number" id="hours-manual-val" step="0.1" placeholder="z.B. 8 oder 0">
-                    </div>
-                </div>
-            </div>
-
-            <div id="section-date-range" class="hidden">
-                <div class="input-row"><div class="input-col"><label>Vom</label><input type="date" id="date-start" onchange="calcDaysDiff()"></div><div class="input-col"><label>Bis</label><input type="date" id="date-end" onchange="calcDaysDiff()"></div></div>
-                <div class="input-row"><div class="input-col"><label>Tage</label><input type="number" id="calc-days-val" value="0"></div></div>
-            </div>
-
-            <div id="section-manual" class="hidden">
-                <div class="input-row"><div class="input-col"><label>Datum</label><input type="date" id="date-manual"></div></div>
-                <div class="input-row"><div class="input-col"><label id="lbl-amount">Menge</label><input type="number" id="inp-amount" placeholder="z.B. 8" step="0.1"></div></div>
             </div>
 
             <div class="input-row"><div class="input-col"><label>Notiz</label><textarea id="inp-note" placeholder="Beschreibung..."></textarea></div></div>
@@ -355,90 +312,50 @@
 
         window.onload = function() {
             const today = new Date().toISOString().slice(0,10);
-            ['date-start-time','date-end-time','date-start','date-end','date-manual'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = today; });
-            updateForm(); updateUI();
+            ['date-start-time','date-end-time','modal-date-start','modal-date-end'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = today; });
+            // Kein UpdateForm mehr nötig, da statisch
+            updateUI();
         };
 
         function formatDateDE(isoDate) { if(!isoDate) return ""; const parts = isoDate.split('-'); return `${parts[2]}.${parts[1]}.${parts[0]}`; }
         function formatNumber(num) { return Number(num.toFixed(2)).toString(); }
         
-        function setMode(m) { 
-            mode = m; 
-            document.getElementById('btn-taken').classList.toggle('active', m === 'taken'); 
-            document.getElementById('btn-earned').classList.toggle('active', m === 'earned'); 
-            updateForm(); 
-        }
-        
-        function updateForm() {
-            const cat = document.getElementById('inp-cat').value;
-            const cHours = document.getElementById('section-hours-manual'); 
-            const cDate = document.getElementById('section-date-range');
-            const cManual = document.getElementById('section-manual'); 
-            const toggles = document.getElementById('mode-toggle-group'); 
-            const lblAmount = document.getElementById('lbl-amount');
-            
-            // Alles resetten
-            [cHours, cDate, cManual].forEach(el => el.classList.add('hidden')); 
-            
-            // Logik: Stunden auf Hauptseite IMMER Erhalten (Plus)
-            if (cat === 'Stunden' || cat === 'Langzeitkonto') {
-                cHours.classList.remove('hidden'); 
-                toggles.style.display = 'none'; // Toggle verstecken
-                mode = 'earned'; // Erzwinge Erhalten
-                
-                // Datum autofill wenn leer
-                const d = document.getElementById('date-start-time').value;
-                if(d && !document.getElementById('date-end-time').value) document.getElementById('date-end-time').value = d;
-            } 
-            else {
-                toggles.style.display = 'flex'; // Toggle zeigen für Rest
-                if (mode === 'earned') {
-                    cManual.classList.remove('hidden'); lblAmount.innerText = "Menge (Tage)";
-                } else {
-                     cDate.classList.remove('hidden'); 
-                }
-            }
-        }
-
-        function calcDaysDiff() { const d1 = new Date(document.getElementById('date-start').value); const d2 = new Date(document.getElementById('date-end').value); let count = 0, curr = new Date(d1); while (curr <= d2) { if (curr.getDay() !== 0 && curr.getDay() !== 6) count++; curr.setDate(curr.getDate() + 1); } document.getElementById('calc-days-val').value = count; }
-
+        // --- HAUPTSEITE SPEICHERN (IMMER STUNDEN ERHALTEN) ---
         function saveEntry() {
-            const cat = document.getElementById('inp-cat').value; const note = document.getElementById('inp-note').value;
-            let hoursVal = 0, dispDate = "", dispTime = "", isoS = "", isoE = "";
+            // Feste Werte für Hauptseite
+            const cat = 'Stunden'; 
+            const mode = 'earned';
             
-            if (cat === 'Stunden' || cat === 'Langzeitkonto') {
-                const ds = document.getElementById('date-start-time').value;
-                const de = document.getElementById('date-end-time').value;
-                let manual = parseFloat(document.getElementById('hours-manual-val').value);
-                if(isNaN(manual)) { alert('Bitte Stunden eingeben'); return; }
-                hoursVal = manual; 
-                dispDate = (ds===de) ? formatDateDE(ds) : `${formatDateDE(ds)} - ${formatDateDE(de)}`; 
-                dispTime = `${document.getElementById('time-start').value} - ${document.getElementById('time-end').value}`; 
-                isoS = ds; isoE = de;
-            } 
-            else if (!document.getElementById('section-manual').classList.contains('hidden')) {
-                const val = parseFloat(document.getElementById('inp-amount').value); const d = document.getElementById('date-manual').value;
-                if (isNaN(val) || !d) { alert('Prüfen'); return; }
-                dispDate = formatDateDE(d); dispTime = "Pauschal"; hoursVal = (['Urlaub','Kindkrank','DA','Sonderurlaub'].includes(cat)) ? val * 8 : val; isoS = isoE = d;
-            } else {
-                const days = parseFloat(document.getElementById('calc-days-val').value); if(isNaN(days)) { alert('Prüfen'); return; }
-                const d1 = document.getElementById('date-start').value; const d2 = document.getElementById('date-end').value;
-                dispDate = (d1===d2) ? formatDateDE(d1) : `${formatDateDE(d1)} - ${formatDateDE(d2)}`; dispTime = days + " Tag(e)"; hoursVal = days*8; isoS = d1; isoE = d2;
-            }
+            const ds = document.getElementById('date-start-time').value;
+            const de = document.getElementById('date-end-time').value;
+            const note = document.getElementById('inp-note').value;
+            
+            if(!ds) { alert('Datum fehlt'); return; }
+            if(!de) { document.getElementById('date-end-time').value = ds; } // Fallback
+            
+            let manualH = document.getElementById('hours-manual-val').value;
+            if(manualH === "") { alert('Bitte Stunden eingeben (oder 0)'); return; }
+            let hoursVal = parseFloat(manualH);
+            
+            let dispDate = (ds===de || !de) ? formatDateDE(ds) : `${formatDateDE(ds)} - ${formatDateDE(de)}`; 
+            let dispTime = `${document.getElementById('time-start').value} - ${document.getElementById('time-end').value}`; 
+            
             if(currentEditId) { entries = entries.filter(e => e.id !== currentEditId); currentEditId = null; document.getElementById('btn-save-main').innerText = "Buchen"; document.getElementById('edit-mode-hint').style.display = 'none'; }
             
-            let icon = CAT_CONFIG[cat] ? CAT_CONFIG[cat].icon : (cat==='Stunden'?'⏰':'•');
-            entries.unshift({ id: Date.now(), cat: cat, date: dispDate, isoStart: isoS, isoEnd: isoE, timeDesc: dispTime, hours: hoursVal, mode: mode, note: note, color: null, icon: icon });
+            entries.unshift({ id: Date.now(), cat: cat, date: dispDate, isoStart: ds, isoEnd: de || ds, timeDesc: dispTime, hours: hoursVal, mode: mode, note: note, color: null, icon: '⏰' });
             localStorage.setItem('trackData_v5', JSON.stringify(entries)); alert('Gespeichert'); updateUI();
             
-            // Felder leeren
             document.getElementById('hours-manual-val').value = "";
+            document.getElementById('inp-note').value = "";
         }
 
         // --- BEARBEITEN ---
         function editEntry(id) {
             const e = entries.find(x => x.id === id); if(!e) return;
-            if(CAT_CONFIG[e.cat] || e.cat === 'Stunden') {
+            
+            // Wenn der Eintrag NICHT "Stunden erhalten" ist, muss er ins Kalender-Modal
+            // "Stunden erhalten" erkennen wir daran: cat=Stunden und mode=earned
+            if(e.cat !== 'Stunden' || e.mode !== 'earned') {
                  closeListView({target:{id:'list-view-modal'}}); 
                  showView('view-calendar', document.querySelectorAll('.nav-item')[1], 'Kalender');
                  modalCurrentIsoDate = e.isoStart; 
@@ -451,7 +368,10 @@
                      if(times && times.length >= 2) document.getElementById('modal-time-end').value = times[1];
                      
                      document.getElementById('modal-note-input').value = e.note || "";
-                     if(e.cat === 'Stunden') document.getElementById('modal-hours-input').value = e.hours;
+                     if(e.cat === 'Stunden') {
+                         document.getElementById('modal-hours-input').value = e.hours;
+                         document.getElementById('modal-hours-container').classList.remove('hidden');
+                     }
 
                      let btn = document.querySelector(`.cat-btn[data-cat="${e.cat}"]`);
                      if(btn) btn.click();
@@ -459,20 +379,21 @@
                  }, 200);
                  return;
             }
-            showView('view-input', document.querySelectorAll('.nav-item')[0], 'Eintrag bearbeiten');
-            document.getElementById('inp-cat').value = e.cat; document.getElementById('inp-note').value = e.note || "";
-            if(e.mode === 'taken' || e.mode === 'earned') setMode(e.mode); updateForm();
-            if(['Urlaub','Kindkrank','DA','Sonderurlaub'].includes(e.cat) && e.mode === 'taken') {
-                document.getElementById('date-start').value = e.isoStart; document.getElementById('date-end').value = e.isoEnd; calcDaysDiff();
-            } else if(e.cat === 'Stunden') {
-                 // Sollte eigentlich nicht mehr hier landen, da oben abgefangen, aber sicherheitshalber
-                 document.getElementById('date-start-time').value = e.isoStart;
-                 document.getElementById('date-end-time').value = e.isoEnd;
-                 document.getElementById('hours-manual-val').value = e.hours;
-            } else {
-                document.getElementById('date-manual').value = e.isoStart; 
+
+            // Wenn es "Stunden erhalten" ist -> Hauptseite
+            showView('view-input', document.querySelectorAll('.nav-item')[0], 'Eingabe');
+            document.getElementById('date-start-time').value = e.isoStart;
+            document.getElementById('date-end-time').value = e.isoEnd;
+            const times = e.timeDesc.match(/(\d{2}:\d{2})/g); 
+            if(times && times.length >= 2) {
+                 document.getElementById('time-start').value = times[0];
+                 document.getElementById('time-end').value = times[1];
             }
+            document.getElementById('hours-manual-val').value = e.hours;
+            document.getElementById('inp-note').value = e.note || "";
+            
             currentEditId = id; document.getElementById('btn-save-main').innerText = "Änderung speichern";
+            document.getElementById('edit-mode-hint').style.display = 'block';
         }
 
         function deleteEntry(id) { 
@@ -620,6 +541,7 @@
             });
             document.getElementById('list-view-modal').classList.add('open');
         }
+        function closeListView(e) { if(e.target.id==='list-view-modal') document.getElementById('list-view-modal').classList.remove('open'); }
         
         function openModal(iso, events) {
             modalCurrentIsoDate = iso; currentEditId = null; 
@@ -665,7 +587,7 @@
             document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             
-            // Stunden Eingabe anzeigen?
+            // Wenn im KALENDER Stunden gewählt wird -> Genommen (und Eingabefeld anzeigen)
             if(cat === 'Stunden') {
                 document.getElementById('modal-hours-container').classList.remove('hidden');
             } else {
@@ -691,16 +613,12 @@
             let hours = 0;
             if(modalSelected.type === 'taken') {
                 if(modalSelected.cat === 'Stunden') {
-                    // MANUELLE STUNDEN (keine Auto-Berechnung)
+                    // Manuelle Eingabe (Kalender)
                     let manualH = document.getElementById('modal-hours-input').value;
                     if(manualH !== "") {
                         hours = parseFloat(manualH);
-                    } else {
-                        // Fallback falls leer gelassen (eigentlich 0, aber User wollte wohl nix abziehen)
-                        hours = 0; 
-                    }
+                    } else { hours = 0; }
                 } else {
-                    // Tage Berechnung für Urlaub etc bleibt
                     let count = 0, curr = new Date(ds), end = new Date(de);
                     while (curr <= end) { if (curr.getDay() !== 0 && curr.getDay() !== 6) count++; curr.setDate(curr.getDate() + 1); }
                     hours = count * 8;
@@ -738,7 +656,7 @@
         function resetAll() { if(confirm("Reset?")) { localStorage.removeItem('trackData_v5'); entries=[]; updateUI(); } }
         function openSettings() { document.getElementById('settings-modal').classList.add('open'); const tb=document.getElementById('settings-tbody'); tb.innerHTML=''; [1,2,3,4,5,6,0].forEach(i=>{ let s=settings.schedule[i]; tb.innerHTML+=`<tr><td>${DAY_NAMES[i]}</td><td><input type="time" id="set-s-${i}" value="${s.s}"></td><td><input type="time" id="set-e-${i}" value="${s.e}"></td></tr>`; }); }
         function saveSettings() { for(let i=0;i<7;i++){ settings.schedule[i]={s:document.getElementById(`set-s-${i}`).value, e:document.getElementById(`set-e-${i}`).value}; } localStorage.setItem('trackSettings_v17', JSON.stringify(settings)); document.getElementById('settings-modal').classList.remove('open'); updateUI(); }
-        function exportData() { const b=new Blob([JSON.stringify({entries,settings})],{type:"application/json"}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download="backup_v40.json"; a.click(); }
+        function exportData() { const b=new Blob([JSON.stringify({entries,settings})],{type:"application/json"}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download="backup_v41.json"; a.click(); }
         function importData(inp) { const r=new FileReader(); r.onload=e=>{ let d=JSON.parse(e.target.result); if(Array.isArray(d)) entries=d; else { entries=d.entries; settings=d.settings; } localStorage.setItem('trackData_v5', JSON.stringify(entries)); updateUI(); }; r.readAsText(inp.files[0]); }
     </script>
 </body>
