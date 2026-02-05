@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Arbeitszeit V52">
-    <title>Arbeitszeit Tracker V52</title>
+    <meta name="apple-mobile-web-app-title" content="Arbeitszeit V53">
+    <title>Arbeitszeit Tracker V53</title>
 
     <style>
         :root {
@@ -527,23 +527,30 @@
                  let bx = document.createElement('div'); bx.className='stat-box'; bx.innerHTML = `<div class="edit-icon">✎</div><h4>${c.n}</h4><span style="color:${d>=0?'#fff':'#ff453a'}">${formatNumber(d)}<span class="unit">${c.u}</span></span>`; bx.onclick = () => adjustStat(c.n, s, c.u); grid.appendChild(bx);
             });
             
+            // STATISTIK: NÄCHSTE TERMINE (STRIKT CHRONOLOGISCH & GEFILTERT)
             const today = new Date().toISOString().slice(0,10);
             
             const upcoming = entries.filter(e => { 
                 if(!e.isoStart) return false;
                 if(e.isoEnd < today) return false; 
-                
-                // --- DER HARTE FILTER FIX (V52) ---
-                // 1. Wenn Modus 'earned' (Plus) -> RAUS
+                // Filter: Keine Stunden Gutschrift
                 if(e.mode === 'earned') return false; 
-                // 2. Sicherheitsnetz für alte Einträge ohne Modus: Wenn Stunden > 0 und Kategorie Stunden -> RAUS
-                if(e.cat === 'Stunden' && e.hours > 0 && e.mode !== 'taken') return false;
-                
+                if(e.cat === 'Stunden' && e.hours > 0 && e.mode !== 'taken') return false; // Safety
                 return true;
             });
 
-            // STRICT DATE SORT
-            upcoming.sort((a,b) => new Date(a.isoStart) - new Date(b.isoStart));
+            // 2-LEVEL SORT: ERST DATUM, DANN UHRZEIT
+            upcoming.sort((a, b) => {
+                // 1. Datum Vergleich (String ISO YYYY-MM-DD ist sortierbar)
+                if (a.isoStart !== b.isoStart) {
+                    return a.isoStart.localeCompare(b.isoStart);
+                }
+                // 2. Zeit Vergleich (Falls am selben Tag)
+                // Versuche HH:MM aus timeDesc zu holen, sonst 00:00
+                let tA = (a.timeDesc && a.timeDesc.match(/(\d{2}:\d{2})/)) ? a.timeDesc.match(/(\d{2}:\d{2})/)[0] : "00:00";
+                let tB = (b.timeDesc && b.timeDesc.match(/(\d{2}:\d{2})/)) ? b.timeDesc.match(/(\d{2}:\d{2})/)[0] : "00:00";
+                return tA.localeCompare(tB);
+            });
             
             const top5 = upcoming.slice(0, 5);
             
@@ -634,7 +641,6 @@
             const filtered = entries.filter(e => { 
                 ensureIsoDates(e); 
                 if(e.isoEnd < today) return false;
-                // AUCH HIER: FILTER FÜR STUNDEN PLUS
                 if(e.mode === 'earned') return false; 
                 if(e.cat === 'Stunden' && e.hours > 0 && e.mode !== 'taken') return false;
 
@@ -745,7 +751,7 @@
             document.getElementById('settings-modal').classList.remove('open'); 
             checkReminders(); updateUI(); 
         }
-        function exportData() { const b=new Blob([JSON.stringify({entries,settings})],{type:"application/json"}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download="backup_v52.json"; a.click(); }
+        function exportData() { const b=new Blob([JSON.stringify({entries,settings})],{type:"application/json"}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download="backup_v53.json"; a.click(); }
         function importData(inp) { const r=new FileReader(); r.onload=e=>{ let d=JSON.parse(e.target.result); if(Array.isArray(d)) entries=d; else { entries=d.entries; settings=d.settings; } localStorage.setItem('trackData_v5', JSON.stringify(entries)); updateUI(); }; r.readAsText(inp.files[0]); }
     </script>
 </body>
