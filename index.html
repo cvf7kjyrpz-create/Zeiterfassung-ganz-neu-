@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Arbeitszeit V55">
-    <title>Arbeitszeit Tracker V55</title>
+    <meta name="apple-mobile-web-app-title" content="Arbeitszeit V56">
+    <title>Arbeitszeit Tracker V56</title>
 
     <style>
         :root {
@@ -94,7 +94,7 @@
         .event-icon { font-size: 9px; line-height: 1; text-shadow: 0 0 2px black;}
         .event-dot { width: 5px; height: 5px; border-radius: 50%; background-color: #555; }
 
-        /* HEUTE MARKIERUNG - 40% WEISS */
+        /* HEUTE MARKIERUNG - 40% WEISS - ZAHL OBEN */
         .day-cell.is-today {
             /* Hintergrund: Oben 40% Weiß, Rest transparent/dunkel */
             background: linear-gradient(to bottom, #ffffff 40%, rgba(255,255,255,0.03) 40%) !important;
@@ -103,7 +103,7 @@
         .day-cell.is-today > span {
             color: #000000 !important; /* Zahl Schwarz */
             font-weight: 900 !important;
-            padding-top: 4px; /* Zahl etwas tiefer */
+            /* KEIN PADDING MEHR - Zahl bleibt oben */
         }
 
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 1000; display: none; justify-content: center; align-items: center; }
@@ -770,7 +770,7 @@
             document.getElementById('settings-modal').classList.remove('open'); 
             checkReminders(); updateUI(); 
         }
-        function exportData() { const b=new Blob([JSON.stringify({entries,settings})],{type:"application/json"}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download="backup_v55.json"; a.click(); }
+        function exportData() { const b=new Blob([JSON.stringify({entries,settings})],{type:"application/json"}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download="backup_v56.json"; a.click(); }
         function importData(inp) { const r=new FileReader(); r.onload=e=>{ let d=JSON.parse(e.target.result); if(Array.isArray(d)) entries=d; else { entries=d.entries; settings=d.settings; } localStorage.setItem('trackData_v5', JSON.stringify(entries)); updateUI(); }; r.readAsText(inp.files[0]); }
     </script>
 </body>
