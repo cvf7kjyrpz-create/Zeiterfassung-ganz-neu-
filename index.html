@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Arbeitszeit V49">
-    <title>Arbeitszeit Tracker V49</title>
+    <meta name="apple-mobile-web-app-title" content="Arbeitszeit V50">
+    <title>Arbeitszeit Tracker V50</title>
 
     <style>
         :root {
@@ -217,9 +217,7 @@
                          </div>
                          <div class="filter-dropdown-menu" id="filter-menu">
                              <div class="filter-option selected" onclick="applyFilter('all', 'Alle')">Alle</div>
-                             
                              <div class="filter-option" onclick="applyFilter('Holiday', 'Feiertage & Ferien')">Feiertage & Ferien</div>
-                             
                              <div class="filter-option" onclick="applyFilter('Urlaub', 'Urlaub')">Urlaub</div>
                              <div class="filter-option" onclick="applyFilter('Kindkonto', 'Kindkonto')">Kindkonto</div>
                              <div class="filter-option" onclick="applyFilter('StundenTaken', 'Stunden (Genommen)')">Stunden (Genommen)</div>
@@ -399,37 +397,77 @@
 
         const DAY_NAMES = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
 
-        // FEIERTAGE UND FERIEN DATENBANK (Thüringen 2026 Beispielhaft)
-        // Format YYYY-MM-DD. Einfachheitshalber als Array.
-        function isThuringiaHoliday(isoDate) {
-            const year = isoDate.split('-')[0];
-            // Feiertage Thüringen (Fix für 2026, kann erweitert werden)
-            const holidays2026 = [
-                "2026-01-01", "2026-04-03", "2026-04-06", "2026-05-01", "2026-05-14", 
-                "2026-05-25", "2026-09-20", "2026-10-03", "2026-10-31", "2026-12-25", "2026-12-26"
-            ];
-            // Ferien Thüringen 2026 (Bereiche vereinfacht als Liste aller Tage wäre besser, aber hier Check der Ranges)
-            // Winter: 09.02.-14.02. | Ostern: 30.03.-11.04. | Sommer: 29.06.-08.08. | Herbst: 12.10.-24.10. | Weihnachten: 23.12.-02.01.
-            const ranges2026 = [
-                ["2026-02-09","2026-02-14"], ["2026-03-30","2026-04-11"], 
-                ["2026-06-29","2026-08-08"], ["2026-10-12","2026-10-24"], ["2026-12-23","2026-12-31"]
-            ];
+        // FEIERTAGS-DATEN THÜRINGEN (Fixe Daten + Range Funktion)
+        // Rückgabe: Name des Feiertags oder NULL
+        function getThuringiaHolidayName(isoDate) {
+            const year = parseInt(isoDate.split('-')[0]);
             
-            if(holidays2026.includes(isoDate)) return true;
-            
-            // Range Check
-            if(year === "2026") {
-                for(let r of ranges2026) {
-                    if(isoDate >= r[0] && isoDate <= r[1]) return true;
+            // 1. FESTE FEIERTAGE (Thüringen)
+            const fixedHolidays = {
+                [`${year}-01-01`]: "Neujahr",
+                [`${year}-05-01`]: "Tag der Arbeit",
+                [`${year}-09-20`]: "Weltkindertag",
+                [`${year}-10-03`]: "Tag der Deutschen Einheit",
+                [`${year}-10-31`]: "Reformationstag",
+                [`${year}-12-25`]: "1. Weihnachtsfeiertag",
+                [`${year}-12-26`]: "2. Weihnachtsfeiertag"
+            };
+            if(fixedHolidays[isoDate]) return "🎉 " + fixedHolidays[isoDate];
+
+            // 2. BEWEGLICHE FEIERTAGE (Ostern etc.)
+            // Ostern Algorithmus ist komplex, hier hardcodiert für 25, 26, 27
+            // Karfreitag, Ostermontag, Himmelfahrt, Pfingstmontag
+            const movable = {
+                "2025": { "2025-04-18":"Karfreitag", "2025-04-21":"Ostermontag", "2025-05-29":"Christi Himmelfahrt", "2025-06-09":"Pfingstmontag" },
+                "2026": { "2026-04-03":"Karfreitag", "2026-04-06":"Ostermontag", "2026-05-14":"Christi Himmelfahrt", "2026-05-25":"Pfingstmontag" },
+                "2027": { "2027-03-26":"Karfreitag", "2027-03-29":"Ostermontag", "2027-05-06":"Christi Himmelfahrt", "2027-05-17":"Pfingstmontag" }
+            };
+            if(movable[year] && movable[year][isoDate]) return "✝️ " + movable[year][isoDate];
+
+            // 3. FERIEN (Thüringen)
+            const vacations = {
+                "2025": [
+                    {s:"2025-02-03", e:"2025-02-08", n:"Winterferien"},
+                    {s:"2025-04-07", e:"2025-04-19", n:"Osterferien"},
+                    {s:"2025-05-30", e:"2025-05-30", n:"Ferientag nach Himmelfahrt"},
+                    {s:"2025-06-28", e:"2025-08-08", n:"Sommerferien"},
+                    {s:"2025-10-06", e:"2025-10-18", n:"Herbstferien"},
+                    {s:"2025-12-22", e:"2025-12-31", n:"Weihnachtsferien"} // Bis Ende Jahr
+                ],
+                "2026": [
+                    {s:"2026-01-01", e:"2026-01-03", n:"Weihnachtsferien"}, // Rest von 25
+                    {s:"2026-02-16", e:"2026-02-21", n:"Winterferien"},
+                    {s:"2026-04-07", e:"2026-04-17", n:"Osterferien"},
+                    {s:"2026-05-15", e:"2026-05-15", n:"Ferientag nach Himmelfahrt"},
+                    {s:"2026-07-04", e:"2026-08-14", n:"Sommerferien"},
+                    {s:"2026-10-12", e:"2026-10-24", n:"Herbstferien"},
+                    {s:"2026-12-23", e:"2026-12-31", n:"Weihnachtsferien"}
+                ],
+                "2027": [
+                    {s:"2027-01-01", e:"2027-01-02", n:"Weihnachtsferien"},
+                    {s:"2027-02-01", e:"2027-02-06", n:"Winterferien"},
+                    {s:"2027-03-22", e:"2027-04-03", n:"Osterferien"},
+                    {s:"2027-05-07", e:"2027-05-07", n:"Ferientag nach Himmelfahrt"},
+                    {s:"2027-07-10", e:"2027-08-20", n:"Sommerferien"},
+                    {s:"2027-10-09", e:"2027-10-23", n:"Herbstferien"},
+                    {s:"2027-12-23", e:"2027-12-31", n:"Weihnachtsferien"}
+                ]
+            };
+
+            if(vacations[year]) {
+                for(let v of vacations[year]) {
+                    if(isoDate >= v.s && isoDate <= v.e) {
+                         let icon = "🏫";
+                         if(v.n.includes("Weihnacht")) icon="🎄";
+                         if(v.n.includes("Oster")) icon="🐰";
+                         if(v.n.includes("Sommer")) icon="☀️";
+                         if(v.n.includes("Herbst")) icon="🍂";
+                         if(v.n.includes("Winter")) icon="❄️";
+                         return icon + " " + v.n;
+                    }
                 }
             }
-            // Fallback für 2025 (Aktuelles Jahr ggf.)
-            if(year === "2025") {
-                 // Beispielhafte Daten 2025
-                 const h25 = ["2025-01-01","2025-04-18","2025-04-21","2025-05-01","2025-05-29","2025-06-09","2025-09-20","2025-10-03","2025-10-31","2025-12-25","2025-12-26"];
-                 if(h25.includes(isoDate)) return true;
-            }
-            return false;
+            return null;
         }
 
         window.onload = function() {
@@ -557,11 +595,15 @@
             
             const today = new Date().toISOString().slice(0,10);
             
-            // NEU: Sortiert chronologisch UND filtert "Stunden Earned" raus
+            // KORREKTUR "Nächste Termine": Strikter Filter auch für importierte Daten
             const upcoming = entries.filter(e => { 
                 if(!e.isoStart) return false;
-                if(e.isoEnd < today) return false; // Nur Zukunft
-                if(e.cat === 'Stunden' && e.mode === 'earned') return false; // KEINE STUNDEN BEKOMMEN
+                if(e.isoEnd < today) return false; 
+                // FILTER: Keine Stunden-Gutschriften anzeigen
+                if(e.cat === 'Stunden' && e.mode === 'earned') return false; 
+                // Sicherheitsnetz für alte Backups ohne Mode aber mit Stunden cat
+                if(e.cat.startsWith('Stunden') && e.hours > 0 && e.mode !== 'taken') return false;
+
                 return true;
             }).sort((a,b) => a.isoStart.localeCompare(b.isoStart)).slice(0, 5); 
             
@@ -597,7 +639,8 @@
                     const cell = document.createElement('div'); cell.className = 'day-cell';
                     
                     // CHECK HOLIDAY
-                    if(isThuringiaHoliday(iso)) {
+                    const holidayName = getThuringiaHolidayName(iso);
+                    if(holidayName) {
                         cell.classList.add('is-holiday');
                     }
 
@@ -621,12 +664,7 @@
                 let inRange = (iso >= e.isoStart && iso <= e.isoEnd);
                 if(!inRange) return false;
                 if(calendarFilter==='all') return true;
-                
-                // WENN FEIERTAGE GEWÄHLT, NUR FEIERTAGE ANZEIGEN?
-                // Der User will "Feiertage" sehen. Da diese keine Entries sind, 
-                // verstecken wir bei diesem Filter alle User-Entries, damit die grünen Zahlen gut sichtbar sind.
                 if(calendarFilter === 'Holiday') return false; 
-
                 if(calendarFilter==='StundenTaken') return e.cat === 'Stunden' && e.mode === 'taken';
                 if(calendarFilter==='StundenEarned') return e.cat === 'Stunden' && e.mode === 'earned';
                 if(['Urlaub','Arzttermin','Ausbildung','Übungsplatz','Übungsplatz Grün','UvD','UvD Standort','KvD','DA','Langzeitkonto','Sonderurlaub','Kindkrank','Sonstiges','Kindkonto'].includes(calendarFilter)) {
@@ -644,6 +682,9 @@
             if(!filtered.length) list.innerHTML = '<div style="text-align:center;padding:20px;color:#666">Keine kommenden Einträge</div>';
             filtered.forEach(e => {
                  if(e.note==="Manuelle Korrektur Statistik") return;
+                 // Auch hier Filtern für Stunden Earned
+                 if(e.cat === 'Stunden' && e.mode === 'earned') return;
+
                  let icon = ''; if(e.cat==='Stunden') icon = e.mode==='earned'?'➕':'⏰'; else icon = e.icon || (CAT_CONFIG[e.cat]?CAT_CONFIG[e.cat].icon:'•');
                  let desc = e.cat; let sub = `${e.date} | ${e.timeDesc}`;
                  list.innerHTML += `<div class="list-view-item future"><div class="lv-icon">${icon}</div><div class="lv-info" onclick="jumpToDate('${e.isoStart}')"><div class="lv-title">${desc}</div><div class="lv-meta">${sub}</div></div><button class="h-action-btn" onclick="editEntry(${e.id})">✎</button></div>`;
@@ -657,9 +698,10 @@
             document.getElementById('modal-date-title').innerText = formatDateDE(iso);
             const body = document.getElementById('modal-body'); body.innerHTML = '';
             
-            // Auch Feiertag im Modal anzeigen
-            if(isThuringiaHoliday(iso)) {
-                 body.innerHTML += `<div style="text-align:center; margin-bottom:10px; color:#30D158; font-weight:bold;">⚠️ Feiertag / Ferien (Thüringen)</div>`;
+            // NAME DER FERIEN ANZEIGEN
+            const holidayName = getThuringiaHolidayName(iso);
+            if(holidayName) {
+                 body.innerHTML += `<div style="text-align:center; margin-bottom:10px; color:#30D158; font-weight:bold; font-size:15px; border-bottom:1px solid #333; padding-bottom:5px;">${holidayName}</div>`;
             }
 
             if(!events.length) body.innerHTML += '<div style="text-align:center;padding:5px;color:#666;font-size:12px;">Keine Einträge an diesem Tag</div>';
@@ -745,7 +787,7 @@
             document.getElementById('settings-modal').classList.remove('open'); 
             checkReminders(); updateUI(); 
         }
-        function exportData() { const b=new Blob([JSON.stringify({entries,settings})],{type:"application/json"}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download="backup_v49.json"; a.click(); }
+        function exportData() { const b=new Blob([JSON.stringify({entries,settings})],{type:"application/json"}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download="backup_v50.json"; a.click(); }
         function importData(inp) { const r=new FileReader(); r.onload=e=>{ let d=JSON.parse(e.target.result); if(Array.isArray(d)) entries=d; else { entries=d.entries; settings=d.settings; } localStorage.setItem('trackData_v5', JSON.stringify(entries)); updateUI(); }; r.readAsText(inp.files[0]); }
     </script>
 </body>
