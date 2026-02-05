@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Arbeitszeit V50">
-    <title>Arbeitszeit Tracker V50</title>
+    <meta name="apple-mobile-web-app-title" content="Arbeitszeit V51">
+    <title>Arbeitszeit Tracker V51</title>
 
     <style>
         :root {
@@ -26,26 +26,13 @@
             --c-da: #BF5AF2;
             --c-lzk: #30D158;
             --c-sonder: #64D2FF;
-            
-            /* Holiday Farbe */
-            --c-holiday: #30D158; /* Grün */
+            --c-holiday: #30D158;
         }
 
         body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Helvetica, Arial, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; font-size: 14px; }
         
-        header { 
-            padding-top: max(10px, env(safe-area-inset-top)); 
-            padding-bottom: 10px; 
-            background-color: var(--bg); 
-            border-bottom: 1px solid var(--card-border); 
-            z-index: 100; 
-            position: relative; 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+        header { padding-top: max(10px, env(safe-area-inset-top)); padding-bottom: 10px; background-color: var(--bg); border-bottom: 1px solid var(--card-border); z-index: 100; position: relative; display: flex; justify-content: center; align-items: center; }
         header h1 { margin: 0; font-size: 16px; font-weight: 600; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; }
-        
         #header-reset-btn { position: absolute; right: 15px; background: none; border: none; font-size: 18px; cursor: pointer; display: none; }
 
         main { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 90px; }
@@ -102,16 +89,10 @@
         .days-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; }
         .day-label { font-size: 9px; color: #555; padding-bottom: 5px; }
         .day-cell { aspect-ratio: 1; display: flex; flex-direction: column; justify-content: space-between; align-items: center; font-size: 12px; border-radius: 4px; position: relative; cursor: pointer; background: rgba(255,255,255,0.03); overflow: hidden; padding: 2px 0; }
+        .day-cell.is-holiday span { color: var(--c-holiday) !important; font-weight: 900 !important; text-shadow: 0 0 5px rgba(48, 209, 88, 0.3); }
         .event-dots { display: flex; justify-content: center; align-items: flex-end; flex-wrap: wrap; gap: 1px; width: 100%; height: 50%; padding-bottom: 2px; }
         .event-icon { font-size: 9px; line-height: 1; text-shadow: 0 0 2px black;}
         .event-dot { width: 5px; height: 5px; border-radius: 50%; background-color: #555; }
-        
-        /* FERIEN/FEIERTAGE STYLE */
-        .day-cell.is-holiday span {
-            color: var(--c-holiday) !important;
-            font-weight: 900 !important;
-            text-shadow: 0 0 5px rgba(48, 209, 88, 0.3);
-        }
 
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 1000; display: none; justify-content: center; align-items: center; }
         .modal-overlay.open { display: flex; }
@@ -147,7 +128,6 @@
         .stat-box.full-width { grid-column: span 3; padding: 8px; cursor: default; text-align: left;}
 
         .data-tools { margin-top: 10px; padding-top: 15px; border-top: 1px solid var(--card-border); display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        
         .btn-settings-big { grid-column: span 2; background: #2c2c2e; border: 1px solid #555; color: white; padding: 15px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; text-align: center; }
         .btn-tool { padding: 10px; background: var(--card); border: 1px solid var(--card-border); color: var(--text); border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
         
@@ -217,6 +197,9 @@
                          </div>
                          <div class="filter-dropdown-menu" id="filter-menu">
                              <div class="filter-option selected" onclick="applyFilter('all', 'Alle')">Alle</div>
+                             
+                             <div class="filter-option" onclick="applyFilter('Dienst', '🪖 Dienst')">🪖 Dienst</div>
+
                              <div class="filter-option" onclick="applyFilter('Holiday', 'Feiertage & Ferien')">Feiertage & Ferien</div>
                              <div class="filter-option" onclick="applyFilter('Urlaub', 'Urlaub')">Urlaub</div>
                              <div class="filter-option" onclick="applyFilter('Kindkonto', 'Kindkonto')">Kindkonto</div>
@@ -280,6 +263,7 @@
     <div id="list-view-modal" class="modal-overlay" onclick="closeListView(event)">
         <div class="modal-content">
             <div class="modal-header"><div class="modal-title">Kommende Termine</div><button class="close-btn" onclick="document.getElementById('list-view-modal').classList.remove('open')">×</button></div>
+            <div style="font-size:12px; color:#666; padding:0 10px 10px; border-bottom:1px solid #333;" id="list-view-subtitle"></div>
             <div id="list-view-body" style="padding-bottom:10px;"></div>
         </div>
     </div>
@@ -397,75 +381,28 @@
 
         const DAY_NAMES = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
 
-        // FEIERTAGS-DATEN THÜRINGEN (Fixe Daten + Range Funktion)
-        // Rückgabe: Name des Feiertags oder NULL
+        // THÜRINGEN DATEN (wie gehabt)
         function getThuringiaHolidayName(isoDate) {
             const year = parseInt(isoDate.split('-')[0]);
-            
-            // 1. FESTE FEIERTAGE (Thüringen)
             const fixedHolidays = {
-                [`${year}-01-01`]: "Neujahr",
-                [`${year}-05-01`]: "Tag der Arbeit",
-                [`${year}-09-20`]: "Weltkindertag",
-                [`${year}-10-03`]: "Tag der Deutschen Einheit",
-                [`${year}-10-31`]: "Reformationstag",
-                [`${year}-12-25`]: "1. Weihnachtsfeiertag",
-                [`${year}-12-26`]: "2. Weihnachtsfeiertag"
+                [`${year}-01-01`]: "Neujahr", [`${year}-05-01`]: "Tag der Arbeit", [`${year}-09-20`]: "Weltkindertag",
+                [`${year}-10-03`]: "Tag der Deutschen Einheit", [`${year}-10-31`]: "Reformationstag",
+                [`${year}-12-25`]: "1. Weihnachtsfeiertag", [`${year}-12-26`]: "2. Weihnachtsfeiertag"
             };
             if(fixedHolidays[isoDate]) return "🎉 " + fixedHolidays[isoDate];
-
-            // 2. BEWEGLICHE FEIERTAGE (Ostern etc.)
-            // Ostern Algorithmus ist komplex, hier hardcodiert für 25, 26, 27
-            // Karfreitag, Ostermontag, Himmelfahrt, Pfingstmontag
             const movable = {
                 "2025": { "2025-04-18":"Karfreitag", "2025-04-21":"Ostermontag", "2025-05-29":"Christi Himmelfahrt", "2025-06-09":"Pfingstmontag" },
                 "2026": { "2026-04-03":"Karfreitag", "2026-04-06":"Ostermontag", "2026-05-14":"Christi Himmelfahrt", "2026-05-25":"Pfingstmontag" },
                 "2027": { "2027-03-26":"Karfreitag", "2027-03-29":"Ostermontag", "2027-05-06":"Christi Himmelfahrt", "2027-05-17":"Pfingstmontag" }
             };
             if(movable[year] && movable[year][isoDate]) return "✝️ " + movable[year][isoDate];
-
-            // 3. FERIEN (Thüringen)
             const vacations = {
-                "2025": [
-                    {s:"2025-02-03", e:"2025-02-08", n:"Winterferien"},
-                    {s:"2025-04-07", e:"2025-04-19", n:"Osterferien"},
-                    {s:"2025-05-30", e:"2025-05-30", n:"Ferientag nach Himmelfahrt"},
-                    {s:"2025-06-28", e:"2025-08-08", n:"Sommerferien"},
-                    {s:"2025-10-06", e:"2025-10-18", n:"Herbstferien"},
-                    {s:"2025-12-22", e:"2025-12-31", n:"Weihnachtsferien"} // Bis Ende Jahr
-                ],
-                "2026": [
-                    {s:"2026-01-01", e:"2026-01-03", n:"Weihnachtsferien"}, // Rest von 25
-                    {s:"2026-02-16", e:"2026-02-21", n:"Winterferien"},
-                    {s:"2026-04-07", e:"2026-04-17", n:"Osterferien"},
-                    {s:"2026-05-15", e:"2026-05-15", n:"Ferientag nach Himmelfahrt"},
-                    {s:"2026-07-04", e:"2026-08-14", n:"Sommerferien"},
-                    {s:"2026-10-12", e:"2026-10-24", n:"Herbstferien"},
-                    {s:"2026-12-23", e:"2026-12-31", n:"Weihnachtsferien"}
-                ],
-                "2027": [
-                    {s:"2027-01-01", e:"2027-01-02", n:"Weihnachtsferien"},
-                    {s:"2027-02-01", e:"2027-02-06", n:"Winterferien"},
-                    {s:"2027-03-22", e:"2027-04-03", n:"Osterferien"},
-                    {s:"2027-05-07", e:"2027-05-07", n:"Ferientag nach Himmelfahrt"},
-                    {s:"2027-07-10", e:"2027-08-20", n:"Sommerferien"},
-                    {s:"2027-10-09", e:"2027-10-23", n:"Herbstferien"},
-                    {s:"2027-12-23", e:"2027-12-31", n:"Weihnachtsferien"}
-                ]
+                "2025": [{s:"2025-02-03",e:"2025-02-08",n:"Winterferien"},{s:"2025-04-07",e:"2025-04-19",n:"Osterferien"},{s:"2025-05-30",e:"2025-05-30",n:"Ferientag n. Himmelfahrt"},{s:"2025-06-28",e:"2025-08-08",n:"Sommerferien"},{s:"2025-10-06",e:"2025-10-18",n:"Herbstferien"},{s:"2025-12-22",e:"2025-12-31",n:"Weihnachtsferien"}],
+                "2026": [{s:"2026-01-01",e:"2026-01-03",n:"Weihnachtsferien"},{s:"2026-02-16",e:"2026-02-21",n:"Winterferien"},{s:"2026-04-07",e:"2026-04-17",n:"Osterferien"},{s:"2026-05-15",e:"2026-05-15",n:"Ferientag n. Himmelfahrt"},{s:"2026-07-04",e:"2026-08-14",n:"Sommerferien"},{s:"2026-10-12",e:"2026-10-24",n:"Herbstferien"},{s:"2026-12-23",e:"2026-12-31",n:"Weihnachtsferien"}],
+                "2027": [{s:"2027-01-01",e:"2027-01-02",n:"Weihnachtsferien"},{s:"2027-02-01",e:"2027-02-06",n:"Winterferien"},{s:"2027-03-22",e:"2027-04-03",n:"Osterferien"},{s:"2027-05-07",e:"2027-05-07",n:"Ferientag n. Himmelfahrt"},{s:"2027-07-10",e:"2027-08-20",n:"Sommerferien"},{s:"2027-10-09",e:"2027-10-23",n:"Herbstferien"},{s:"2027-12-23",e:"2027-12-31",n:"Weihnachtsferien"}]
             };
-
             if(vacations[year]) {
-                for(let v of vacations[year]) {
-                    if(isoDate >= v.s && isoDate <= v.e) {
-                         let icon = "🏫";
-                         if(v.n.includes("Weihnacht")) icon="🎄";
-                         if(v.n.includes("Oster")) icon="🐰";
-                         if(v.n.includes("Sommer")) icon="☀️";
-                         if(v.n.includes("Herbst")) icon="🍂";
-                         if(v.n.includes("Winter")) icon="❄️";
-                         return icon + " " + v.n;
-                    }
-                }
+                for(let v of vacations[year]) { if(isoDate >= v.s && isoDate <= v.e) { let icon="🏫"; if(v.n.includes("Weihnacht")) icon="🎄"; if(v.n.includes("Oster")) icon="🐰"; if(v.n.includes("Sommer")) icon="☀️"; if(v.n.includes("Herbst")) icon="🍂"; if(v.n.includes("Winter")) icon="❄️"; return icon+" "+v.n; } }
             }
             return null;
         }
@@ -593,22 +530,25 @@
                  let bx = document.createElement('div'); bx.className='stat-box'; bx.innerHTML = `<div class="edit-icon">✎</div><h4>${c.n}</h4><span style="color:${d>=0?'#fff':'#ff453a'}">${formatNumber(d)}<span class="unit">${c.u}</span></span>`; bx.onclick = () => adjustStat(c.n, s, c.u); grid.appendChild(bx);
             });
             
+            // STATISTIK: NÄCHSTE TERMINE (STRIKT CHRONOLOGISCH & GEFILTERT)
             const today = new Date().toISOString().slice(0,10);
             
-            // KORREKTUR "Nächste Termine": Strikter Filter auch für importierte Daten
             const upcoming = entries.filter(e => { 
                 if(!e.isoStart) return false;
                 if(e.isoEnd < today) return false; 
-                // FILTER: Keine Stunden-Gutschriften anzeigen
+                // Filter: Keine Stunden Gutschrift
                 if(e.cat === 'Stunden' && e.mode === 'earned') return false; 
-                // Sicherheitsnetz für alte Backups ohne Mode aber mit Stunden cat
-                if(e.cat.startsWith('Stunden') && e.hours > 0 && e.mode !== 'taken') return false;
-
+                if(e.cat.startsWith('Stunden') && e.hours > 0 && e.mode !== 'taken') return false; // Safety for old data
                 return true;
-            }).sort((a,b) => a.isoStart.localeCompare(b.isoStart)).slice(0, 5); 
+            });
+
+            // STRICT DATE SORT
+            upcoming.sort((a,b) => new Date(a.isoStart) - new Date(b.isoStart));
             
-            let listHtml = upcoming.length ? '' : '<div style="font-size:11px; color:#666;">Keine Termine</div>';
-            upcoming.forEach(u => {
+            const top5 = upcoming.slice(0, 5);
+            
+            let listHtml = top5.length ? '' : '<div style="font-size:11px; color:#666;">Keine Termine</div>';
+            top5.forEach(u => {
                 let icon = '';
                 if(u.cat === 'Stunden') { icon = (u.mode==='earned')?'➕':'⏰'; } else if(u.icon) icon = u.icon; else if(CAT_CONFIG[u.cat]) icon=CAT_CONFIG[u.cat].icon; else icon='•';
                 let noteHtml = u.note ? `<div style="font-size:10px; color:#aaa; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;">${u.note}</div>` : '';
@@ -635,14 +575,10 @@
                 for(let d=1; d<=days; d++) {
                     const iso = `${currentCalYear}-${(i+1).toString().padStart(2,'0')}-${d.toString().padStart(2,'0')}`;
                     const evs = getEventsForDate(iso); 
-                    
                     const cell = document.createElement('div'); cell.className = 'day-cell';
                     
-                    // CHECK HOLIDAY
                     const holidayName = getThuringiaHolidayName(iso);
-                    if(holidayName) {
-                        cell.classList.add('is-holiday');
-                    }
+                    if(holidayName) { cell.classList.add('is-holiday'); }
 
                     if(evs.length) cell.classList.add('has-event');
                     let dots = ''; let limit = 4; let showEvs = evs.slice(0, limit);
@@ -665,6 +601,7 @@
                 if(!inRange) return false;
                 if(calendarFilter==='all') return true;
                 if(calendarFilter === 'Holiday') return false; 
+                if(calendarFilter==='Dienst') { return ['UvD','KvD','UvD Standort','Übungsplatz','Übungsplatz Grün'].includes(e.cat); } // NEU
                 if(calendarFilter==='StundenTaken') return e.cat === 'Stunden' && e.mode === 'taken';
                 if(calendarFilter==='StundenEarned') return e.cat === 'Stunden' && e.mode === 'earned';
                 if(['Urlaub','Arzttermin','Ausbildung','Übungsplatz','Übungsplatz Grün','UvD','UvD Standort','KvD','DA','Langzeitkonto','Sonderurlaub','Kindkrank','Sonstiges','Kindkonto'].includes(calendarFilter)) {
@@ -677,14 +614,35 @@
         
         function openListModal() {
             const list = document.getElementById('list-view-body'); list.innerHTML = '';
+            const sub = document.getElementById('list-view-subtitle');
+            
+            // INTELLIGENTER FILTER FÜR DIE LISTE
+            let filterFunc = (e) => true;
+            let titleText = "Alle kommenden Einträge";
+
+            if(calendarFilter === 'Dienst') {
+                filterFunc = (e) => ['UvD','KvD','UvD Standort','Übungsplatz','Übungsplatz Grün'].includes(e.cat);
+                titleText = "Kommende Dienste";
+            } else if (calendarFilter === 'Urlaub') {
+                filterFunc = (e) => ['Urlaub','Stunden'].includes(e.cat) && e.mode === 'taken';
+                titleText = "Geplanter Urlaub / Stundenabbau";
+            } else if (calendarFilter !== 'all' && calendarFilter !== 'Holiday') {
+                filterFunc = (e) => e.cat === calendarFilter;
+                titleText = `Kommende: ${calendarFilter}`;
+            }
+
+            sub.innerText = titleText;
+
             const today = new Date().toISOString().slice(0,10);
-            const filtered = entries.filter(e => { ensureIsoDates(e); return e.isoEnd >= today; }).sort((a,b) => a.isoStart.localeCompare(b.isoStart));
-            if(!filtered.length) list.innerHTML = '<div style="text-align:center;padding:20px;color:#666">Keine kommenden Einträge</div>';
+            const filtered = entries.filter(e => { 
+                ensureIsoDates(e); 
+                if(e.isoEnd < today) return false;
+                return filterFunc(e);
+            }).sort((a,b) => new Date(a.isoStart) - new Date(b.isoStart)); // SORT DATE OBJECT
+
+            if(!filtered.length) list.innerHTML = '<div style="text-align:center;padding:20px;color:#666">Keine Einträge gefunden</div>';
             filtered.forEach(e => {
                  if(e.note==="Manuelle Korrektur Statistik") return;
-                 // Auch hier Filtern für Stunden Earned
-                 if(e.cat === 'Stunden' && e.mode === 'earned') return;
-
                  let icon = ''; if(e.cat==='Stunden') icon = e.mode==='earned'?'➕':'⏰'; else icon = e.icon || (CAT_CONFIG[e.cat]?CAT_CONFIG[e.cat].icon:'•');
                  let desc = e.cat; let sub = `${e.date} | ${e.timeDesc}`;
                  list.innerHTML += `<div class="list-view-item future"><div class="lv-icon">${icon}</div><div class="lv-info" onclick="jumpToDate('${e.isoStart}')"><div class="lv-title">${desc}</div><div class="lv-meta">${sub}</div></div><button class="h-action-btn" onclick="editEntry(${e.id})">✎</button></div>`;
@@ -698,7 +656,6 @@
             document.getElementById('modal-date-title').innerText = formatDateDE(iso);
             const body = document.getElementById('modal-body'); body.innerHTML = '';
             
-            // NAME DER FERIEN ANZEIGEN
             const holidayName = getThuringiaHolidayName(iso);
             if(holidayName) {
                  body.innerHTML += `<div style="text-align:center; margin-bottom:10px; color:#30D158; font-weight:bold; font-size:15px; border-bottom:1px solid #333; padding-bottom:5px;">${holidayName}</div>`;
@@ -787,7 +744,7 @@
             document.getElementById('settings-modal').classList.remove('open'); 
             checkReminders(); updateUI(); 
         }
-        function exportData() { const b=new Blob([JSON.stringify({entries,settings})],{type:"application/json"}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download="backup_v50.json"; a.click(); }
+        function exportData() { const b=new Blob([JSON.stringify({entries,settings})],{type:"application/json"}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download="backup_v51.json"; a.click(); }
         function importData(inp) { const r=new FileReader(); r.onload=e=>{ let d=JSON.parse(e.target.result); if(Array.isArray(d)) entries=d; else { entries=d.entries; settings=d.settings; } localStorage.setItem('trackData_v5', JSON.stringify(entries)); updateUI(); }; r.readAsText(inp.files[0]); }
     </script>
 </body>
