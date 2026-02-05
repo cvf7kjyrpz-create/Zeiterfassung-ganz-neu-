@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Arbeitszeit V53">
-    <title>Arbeitszeit Tracker V53</title>
+    <meta name="apple-mobile-web-app-title" content="Arbeitszeit V54">
+    <title>Arbeitszeit Tracker V54</title>
 
     <style>
         :root {
@@ -93,6 +93,18 @@
         .event-dots { display: flex; justify-content: center; align-items: flex-end; flex-wrap: wrap; gap: 1px; width: 100%; height: 50%; padding-bottom: 2px; }
         .event-icon { font-size: 9px; line-height: 1; text-shadow: 0 0 2px black;}
         .event-dot { width: 5px; height: 5px; border-radius: 50%; background-color: #555; }
+
+        /* NEU V54: HEUTE MARKIERUNG */
+        .day-cell.is-today {
+            /* Hintergrund: Oben 35% Weiß, Rest transparent/dunkel */
+            background: linear-gradient(to bottom, #ffffff 35%, rgba(255,255,255,0.03) 35%) !important;
+            border: 1px solid #777; /* Leichter heller Rahmen zur Betonung */
+        }
+        .day-cell.is-today > span {
+            color: #000000 !important; /* Zahl Schwarz */
+            font-weight: 900 !important;
+            padding-top: 2px; /* Leichtes Adjustieren */
+        }
 
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 1000; display: none; justify-content: center; align-items: center; }
         .modal-overlay.open { display: flex; }
@@ -527,26 +539,18 @@
                  let bx = document.createElement('div'); bx.className='stat-box'; bx.innerHTML = `<div class="edit-icon">✎</div><h4>${c.n}</h4><span style="color:${d>=0?'#fff':'#ff453a'}">${formatNumber(d)}<span class="unit">${c.u}</span></span>`; bx.onclick = () => adjustStat(c.n, s, c.u); grid.appendChild(bx);
             });
             
-            // STATISTIK: NÄCHSTE TERMINE (STRIKT CHRONOLOGISCH & GEFILTERT)
             const today = new Date().toISOString().slice(0,10);
             
             const upcoming = entries.filter(e => { 
                 if(!e.isoStart) return false;
                 if(e.isoEnd < today) return false; 
-                // Filter: Keine Stunden Gutschrift
                 if(e.mode === 'earned') return false; 
-                if(e.cat === 'Stunden' && e.hours > 0 && e.mode !== 'taken') return false; // Safety
+                if(e.cat === 'Stunden' && e.hours > 0 && e.mode !== 'taken') return false; 
                 return true;
             });
 
-            // 2-LEVEL SORT: ERST DATUM, DANN UHRZEIT
             upcoming.sort((a, b) => {
-                // 1. Datum Vergleich (String ISO YYYY-MM-DD ist sortierbar)
-                if (a.isoStart !== b.isoStart) {
-                    return a.isoStart.localeCompare(b.isoStart);
-                }
-                // 2. Zeit Vergleich (Falls am selben Tag)
-                // Versuche HH:MM aus timeDesc zu holen, sonst 00:00
+                if (a.isoStart !== b.isoStart) { return a.isoStart.localeCompare(b.isoStart); }
                 let tA = (a.timeDesc && a.timeDesc.match(/(\d{2}:\d{2})/)) ? a.timeDesc.match(/(\d{2}:\d{2})/)[0] : "00:00";
                 let tB = (b.timeDesc && b.timeDesc.match(/(\d{2}:\d{2})/)) ? b.timeDesc.match(/(\d{2}:\d{2})/)[0] : "00:00";
                 return tA.localeCompare(tB);
@@ -572,7 +576,13 @@
         }
 
         function renderCalendar() {
-            document.getElementById('calendar-year-display').innerText = currentCalYear; const root = document.getElementById('calendar-root'); root.innerHTML = ''; const now = new Date();
+            document.getElementById('calendar-year-display').innerText = currentCalYear; const root = document.getElementById('calendar-root'); root.innerHTML = ''; 
+            const now = new Date();
+            // ECHTE "HEUTE" WERTE
+            const realTodayDate = now.getDate();
+            const realTodayMonth = now.getMonth();
+            const realTodayYear = now.getFullYear();
+
             for (let i = 0; i < 12; i++) {
                 const md = document.createElement('div'); md.className = 'month-card'; if(currentCalYear === now.getFullYear() && i === now.getMonth()) md.id = 'current-month-card';
                 md.innerHTML = `<div class="month-name">${["Jan","Feb","Mär","Apr","Mai","Jun","Jul","Aug","Sep","Okt","Nov","Dez"][i]}</div>`;
@@ -583,6 +593,12 @@
                     const iso = `${currentCalYear}-${(i+1).toString().padStart(2,'0')}-${d.toString().padStart(2,'0')}`;
                     const evs = getEventsForDate(iso); 
                     const cell = document.createElement('div'); cell.className = 'day-cell';
+                    
+                    // HEUTE PRÜFUNG (V54)
+                    if (currentCalYear === realTodayYear && i === realTodayMonth && d === realTodayDate) {
+                        cell.classList.add('is-today');
+                    }
+
                     const holidayName = getThuringiaHolidayName(iso);
                     if(holidayName) { cell.classList.add('is-holiday'); }
                     if(evs.length) cell.classList.add('has-event');
@@ -596,6 +612,12 @@
                     cell.innerHTML = `<span>${d}</span><div class="event-dots">${dots}</div>`; cell.onclick = () => openModal(iso, evs); dg.appendChild(cell);
                 } md.appendChild(dg); root.appendChild(md);
             }
+            
+            // AUTO SCROLL TO TODAY (V54)
+            setTimeout(() => {
+                const todayEl = document.querySelector('.is-today');
+                if(todayEl) todayEl.scrollIntoView({behavior: "smooth", block: "center"});
+            }, 500);
         }
         function changeYear(d) { currentCalYear += d; renderCalendar(); }
         
@@ -751,7 +773,7 @@
             document.getElementById('settings-modal').classList.remove('open'); 
             checkReminders(); updateUI(); 
         }
-        function exportData() { const b=new Blob([JSON.stringify({entries,settings})],{type:"application/json"}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download="backup_v53.json"; a.click(); }
+        function exportData() { const b=new Blob([JSON.stringify({entries,settings})],{type:"application/json"}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download="backup_v54.json"; a.click(); }
         function importData(inp) { const r=new FileReader(); r.onload=e=>{ let d=JSON.parse(e.target.result); if(Array.isArray(d)) entries=d; else { entries=d.entries; settings=d.settings; } localStorage.setItem('trackData_v5', JSON.stringify(entries)); updateUI(); }; r.readAsText(inp.files[0]); }
     </script>
 </body>
