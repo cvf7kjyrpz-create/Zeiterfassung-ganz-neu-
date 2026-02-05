@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Arbeitszeit V51">
-    <title>Arbeitszeit Tracker V51</title>
+    <meta name="apple-mobile-web-app-title" content="Arbeitszeit V52">
+    <title>Arbeitszeit Tracker V52</title>
 
     <style>
         :root {
@@ -381,7 +381,6 @@
 
         const DAY_NAMES = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
 
-        // THÜRINGEN DATEN (wie gehabt)
         function getThuringiaHolidayName(isoDate) {
             const year = parseInt(isoDate.split('-')[0]);
             const fixedHolidays = {
@@ -426,7 +425,6 @@
             renderCalendar();
         }
 
-        // --- REMINDERS ---
         function checkReminders() {
             const today = new Date(); today.setHours(0,0,0,0);
             activeReminders = [];
@@ -469,7 +467,6 @@
             activeReminders.shift(); showNextReminder();
         }
 
-        // --- SAVE/EDIT ---
         function saveEntry() {
             const cat = 'Stunden'; const mode = 'earned';
             const ds = document.getElementById('date-start-time').value; const de = document.getElementById('date-end-time').value; const note = document.getElementById('inp-note').value;
@@ -530,15 +527,18 @@
                  let bx = document.createElement('div'); bx.className='stat-box'; bx.innerHTML = `<div class="edit-icon">✎</div><h4>${c.n}</h4><span style="color:${d>=0?'#fff':'#ff453a'}">${formatNumber(d)}<span class="unit">${c.u}</span></span>`; bx.onclick = () => adjustStat(c.n, s, c.u); grid.appendChild(bx);
             });
             
-            // STATISTIK: NÄCHSTE TERMINE (STRIKT CHRONOLOGISCH & GEFILTERT)
             const today = new Date().toISOString().slice(0,10);
             
             const upcoming = entries.filter(e => { 
                 if(!e.isoStart) return false;
                 if(e.isoEnd < today) return false; 
-                // Filter: Keine Stunden Gutschrift
-                if(e.cat === 'Stunden' && e.mode === 'earned') return false; 
-                if(e.cat.startsWith('Stunden') && e.hours > 0 && e.mode !== 'taken') return false; // Safety for old data
+                
+                // --- DER HARTE FILTER FIX (V52) ---
+                // 1. Wenn Modus 'earned' (Plus) -> RAUS
+                if(e.mode === 'earned') return false; 
+                // 2. Sicherheitsnetz für alte Einträge ohne Modus: Wenn Stunden > 0 und Kategorie Stunden -> RAUS
+                if(e.cat === 'Stunden' && e.hours > 0 && e.mode !== 'taken') return false;
+                
                 return true;
             });
 
@@ -576,10 +576,8 @@
                     const iso = `${currentCalYear}-${(i+1).toString().padStart(2,'0')}-${d.toString().padStart(2,'0')}`;
                     const evs = getEventsForDate(iso); 
                     const cell = document.createElement('div'); cell.className = 'day-cell';
-                    
                     const holidayName = getThuringiaHolidayName(iso);
                     if(holidayName) { cell.classList.add('is-holiday'); }
-
                     if(evs.length) cell.classList.add('has-event');
                     let dots = ''; let limit = 4; let showEvs = evs.slice(0, limit);
                     showEvs.forEach(e => {
@@ -601,7 +599,7 @@
                 if(!inRange) return false;
                 if(calendarFilter==='all') return true;
                 if(calendarFilter === 'Holiday') return false; 
-                if(calendarFilter==='Dienst') { return ['UvD','KvD','UvD Standort','Übungsplatz','Übungsplatz Grün'].includes(e.cat); } // NEU
+                if(calendarFilter==='Dienst') { return ['UvD','KvD','UvD Standort','Übungsplatz','Übungsplatz Grün'].includes(e.cat); } 
                 if(calendarFilter==='StundenTaken') return e.cat === 'Stunden' && e.mode === 'taken';
                 if(calendarFilter==='StundenEarned') return e.cat === 'Stunden' && e.mode === 'earned';
                 if(['Urlaub','Arzttermin','Ausbildung','Übungsplatz','Übungsplatz Grün','UvD','UvD Standort','KvD','DA','Langzeitkonto','Sonderurlaub','Kindkrank','Sonstiges','Kindkonto'].includes(calendarFilter)) {
@@ -616,7 +614,6 @@
             const list = document.getElementById('list-view-body'); list.innerHTML = '';
             const sub = document.getElementById('list-view-subtitle');
             
-            // INTELLIGENTER FILTER FÜR DIE LISTE
             let filterFunc = (e) => true;
             let titleText = "Alle kommenden Einträge";
 
@@ -637,8 +634,12 @@
             const filtered = entries.filter(e => { 
                 ensureIsoDates(e); 
                 if(e.isoEnd < today) return false;
+                // AUCH HIER: FILTER FÜR STUNDEN PLUS
+                if(e.mode === 'earned') return false; 
+                if(e.cat === 'Stunden' && e.hours > 0 && e.mode !== 'taken') return false;
+
                 return filterFunc(e);
-            }).sort((a,b) => new Date(a.isoStart) - new Date(b.isoStart)); // SORT DATE OBJECT
+            }).sort((a,b) => new Date(a.isoStart) - new Date(b.isoStart));
 
             if(!filtered.length) list.innerHTML = '<div style="text-align:center;padding:20px;color:#666">Keine Einträge gefunden</div>';
             filtered.forEach(e => {
@@ -744,7 +745,7 @@
             document.getElementById('settings-modal').classList.remove('open'); 
             checkReminders(); updateUI(); 
         }
-        function exportData() { const b=new Blob([JSON.stringify({entries,settings})],{type:"application/json"}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download="backup_v51.json"; a.click(); }
+        function exportData() { const b=new Blob([JSON.stringify({entries,settings})],{type:"application/json"}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download="backup_v52.json"; a.click(); }
         function importData(inp) { const r=new FileReader(); r.onload=e=>{ let d=JSON.parse(e.target.result); if(Array.isArray(d)) entries=d; else { entries=d.entries; settings=d.settings; } localStorage.setItem('trackData_v5', JSON.stringify(entries)); updateUI(); }; r.readAsText(inp.files[0]); }
     </script>
 </body>
