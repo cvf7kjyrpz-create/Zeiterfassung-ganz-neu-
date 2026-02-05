@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Arbeitszeit V48">
-    <title>Arbeitszeit Tracker V48</title>
+    <meta name="apple-mobile-web-app-title" content="Arbeitszeit V49">
+    <title>Arbeitszeit Tracker V49</title>
 
     <style>
         :root {
@@ -26,34 +26,27 @@
             --c-da: #BF5AF2;
             --c-lzk: #30D158;
             --c-sonder: #64D2FF;
+            
+            /* Holiday Farbe */
+            --c-holiday: #30D158; /* Grün */
         }
 
         body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Helvetica, Arial, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; font-size: 14px; }
         
-        /* Header Anpassung für Reset Button rechts */
         header { 
             padding-top: max(10px, env(safe-area-inset-top)); 
             padding-bottom: 10px; 
             background-color: var(--bg); 
             border-bottom: 1px solid var(--card-border); 
             z-index: 100; 
-            position: relative; /* Wichtig für absolute Positionierung */
+            position: relative; 
             display: flex;
             justify-content: center;
             align-items: center;
         }
         header h1 { margin: 0; font-size: 16px; font-weight: 600; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; }
         
-        /* Der Mülleimer oben rechts */
-        #header-reset-btn {
-            position: absolute;
-            right: 15px;
-            background: none;
-            border: none;
-            font-size: 18px;
-            cursor: pointer;
-            display: none; /* Standardmäßig versteckt */
-        }
+        #header-reset-btn { position: absolute; right: 15px; background: none; border: none; font-size: 18px; cursor: pointer; display: none; }
 
         main { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 90px; }
 
@@ -70,7 +63,6 @@
 
         .hidden { display: none !important; }
 
-        /* Listen */
         .history-item, .list-view-item, .upcoming-item { background-color: var(--card); padding: 10px 12px; border-radius: 8px; margin-bottom: 6px; border-left: 4px solid #555; position: relative; display: flex; justify-content: space-between; align-items: center; }
         .cat-urlaub { border-left-color: var(--c-urlaub); }
         .cat-stunden { border-left-color: var(--c-stunden); }
@@ -89,25 +81,15 @@
         .h-btn-group { display: flex; gap: 10px; align-items: center; z-index: 10; position: relative; }
         .h-action-btn { background: #2c2c2e; border: 1px solid #444; color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; }
 
-        /* Kalender */
         #cal-sticky-header { position: sticky; top: -15px; background-color: var(--bg); z-index: 50; padding-top: 15px; padding-bottom: 5px; margin-bottom: 10px; border-bottom: 1px solid var(--card-border); }
         .year-selector { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 18px; font-weight: bold; }
         .year-btn { background: none; border: none; color: var(--accent); font-size: 24px; cursor: pointer; padding: 0 20px; }
         
         .filter-wrapper { position: relative; display: inline-block; }
-        .filter-toggle-btn { 
-            background: var(--card); border: 1px solid var(--card-border); color: var(--text-sub);
-            padding: 6px 15px; border-radius: 15px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px;
-        }
+        .filter-toggle-btn { background: var(--card); border: 1px solid var(--card-border); color: var(--text-sub); padding: 6px 15px; border-radius: 15px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px; }
         .filter-toggle-btn.active { color: var(--accent); border-color: var(--accent); }
         
-        .filter-dropdown-menu {
-            position: absolute; top: 35px; right: 0; 
-            background: #2c2c2e; border: 1px solid #444; border-radius: 10px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 200;
-            display: none; flex-direction: column; min-width: 160px;
-            max-height: 300px; overflow-y: auto; 
-        }
+        .filter-dropdown-menu { position: absolute; top: 35px; right: 0; background: #2c2c2e; border: 1px solid #444; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 200; display: none; flex-direction: column; min-width: 160px; max-height: 300px; overflow-y: auto; }
         .filter-dropdown-menu.show { display: flex; }
         .filter-option { padding: 12px 15px; color: #ddd; font-size: 13px; cursor: pointer; border-bottom: 1px solid #3a3a3c; }
         .filter-option:last-child { border-bottom: none; }
@@ -123,6 +105,13 @@
         .event-dots { display: flex; justify-content: center; align-items: flex-end; flex-wrap: wrap; gap: 1px; width: 100%; height: 50%; padding-bottom: 2px; }
         .event-icon { font-size: 9px; line-height: 1; text-shadow: 0 0 2px black;}
         .event-dot { width: 5px; height: 5px; border-radius: 50%; background-color: #555; }
+        
+        /* FERIEN/FEIERTAGE STYLE */
+        .day-cell.is-holiday span {
+            color: var(--c-holiday) !important;
+            font-weight: 900 !important;
+            text-shadow: 0 0 5px rgba(48, 209, 88, 0.3);
+        }
 
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 1000; display: none; justify-content: center; align-items: center; }
         .modal-overlay.open { display: flex; }
@@ -159,7 +148,7 @@
 
         .data-tools { margin-top: 10px; padding-top: 15px; border-top: 1px solid var(--card-border); display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         
-        /* SETTINGS BUTTON ANGEPASST (WIE ANDERE TOOLS) */
+        .btn-settings-big { grid-column: span 2; background: #2c2c2e; border: 1px solid #555; color: white; padding: 15px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; text-align: center; }
         .btn-tool { padding: 10px; background: var(--card); border: 1px solid var(--card-border); color: var(--text); border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
         
         .settings-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
@@ -228,6 +217,9 @@
                          </div>
                          <div class="filter-dropdown-menu" id="filter-menu">
                              <div class="filter-option selected" onclick="applyFilter('all', 'Alle')">Alle</div>
+                             
+                             <div class="filter-option" onclick="applyFilter('Holiday', 'Feiertage & Ferien')">Feiertage & Ferien</div>
+                             
                              <div class="filter-option" onclick="applyFilter('Urlaub', 'Urlaub')">Urlaub</div>
                              <div class="filter-option" onclick="applyFilter('Kindkonto', 'Kindkonto')">Kindkonto</div>
                              <div class="filter-option" onclick="applyFilter('StundenTaken', 'Stunden (Genommen)')">Stunden (Genommen)</div>
@@ -262,7 +254,7 @@
         <div id="view-stats" class="view">
             <div class="stats-grid" id="stats-grid"></div>
             <div class="data-tools">
-                <button class="btn-tool" onclick="openSettings()">⚙️ Einstellungen</button>
+                <button class="btn-settings-big" onclick="openSettings()">⚙️ Einstellungen / Erinnerungen</button>
                 <button class="btn-tool" onclick="exportData()">💾 Backup</button>
                 <button class="btn-tool" onclick="document.getElementById('file-upload').click()">📂 Laden</button>
                 <input type="file" id="file-upload" accept=".json" style="display:none" onchange="importData(this)">
@@ -387,19 +379,15 @@
         let activeReminders = []; 
         let modalSelected = { cat: '', icon: '', type: '' };
 
-        // KONFIGURATION: NEUE ICONS
         const CAT_CONFIG = {
             'Arzttermin': { icon: '💉', type: 'note' },
-            'Übungsplatz': { icon: '🔧', type: 'note' }, // Blau
-            'Übungsplatz Grün': { icon: '🌳', type: 'note' }, // Grün
-            
-            // ALLE URLAUBSTYPEN JETZT: 🏖️
+            'Übungsplatz': { icon: '🔧', type: 'note' }, 
+            'Übungsplatz Grün': { icon: '🌳', type: 'note' }, 
             'Urlaub': { icon: '🏖️', type: 'taken' },
-            'Kindkonto': { icon: '🏖️', type: 'taken' }, // NEU
+            'Kindkonto': { icon: '🏖️', type: 'taken' }, 
             'DA': { icon: '🏖️', type: 'taken' },
             'Langzeitkonto': { icon: '🏖️', type: 'taken' },
             'Sonderurlaub': { icon: '🏖️', type: 'taken' },
-            
             'Stunden': { icon: '⏰', type: 'taken' },
             'UvD': { icon: '🏠', type: 'note' },
             'UvD Standort': { icon: '🏠', type: 'note' },
@@ -410,6 +398,39 @@
         };
 
         const DAY_NAMES = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
+
+        // FEIERTAGE UND FERIEN DATENBANK (Thüringen 2026 Beispielhaft)
+        // Format YYYY-MM-DD. Einfachheitshalber als Array.
+        function isThuringiaHoliday(isoDate) {
+            const year = isoDate.split('-')[0];
+            // Feiertage Thüringen (Fix für 2026, kann erweitert werden)
+            const holidays2026 = [
+                "2026-01-01", "2026-04-03", "2026-04-06", "2026-05-01", "2026-05-14", 
+                "2026-05-25", "2026-09-20", "2026-10-03", "2026-10-31", "2026-12-25", "2026-12-26"
+            ];
+            // Ferien Thüringen 2026 (Bereiche vereinfacht als Liste aller Tage wäre besser, aber hier Check der Ranges)
+            // Winter: 09.02.-14.02. | Ostern: 30.03.-11.04. | Sommer: 29.06.-08.08. | Herbst: 12.10.-24.10. | Weihnachten: 23.12.-02.01.
+            const ranges2026 = [
+                ["2026-02-09","2026-02-14"], ["2026-03-30","2026-04-11"], 
+                ["2026-06-29","2026-08-08"], ["2026-10-12","2026-10-24"], ["2026-12-23","2026-12-31"]
+            ];
+            
+            if(holidays2026.includes(isoDate)) return true;
+            
+            // Range Check
+            if(year === "2026") {
+                for(let r of ranges2026) {
+                    if(isoDate >= r[0] && isoDate <= r[1]) return true;
+                }
+            }
+            // Fallback für 2025 (Aktuelles Jahr ggf.)
+            if(year === "2025") {
+                 // Beispielhafte Daten 2025
+                 const h25 = ["2025-01-01","2025-04-18","2025-04-21","2025-05-01","2025-05-29","2025-06-09","2025-09-20","2025-10-03","2025-10-31","2025-12-25","2025-12-26"];
+                 if(h25.includes(isoDate)) return true;
+            }
+            return false;
+        }
 
         window.onload = function() {
             const today = new Date().toISOString().slice(0,10);
@@ -529,14 +550,21 @@
             entries.forEach(e => { let v = (e.mode==='taken') ? -e.hours : e.hours; if(['Urlaub','DA','Sonderurlaub','Kindkonto'].includes(e.cat)) tDays += v; else if(['Stunden','Langzeitkonto'].includes(e.cat)) tHours += v; });
             grid.innerHTML += `<div class="stat-box summary"><div><h4>∑ Tage</h4><span style="color:${tDays>=0?'#fff':'#ff453a'}">${formatNumber(tDays/8)}<span class="unit">Ges</span></span></div><div><h4>∑ Stunden</h4><span style="color:${tHours>=0?'#fff':'#ff453a'}">${formatNumber(tHours)}<span class="unit">Ges</span></span></div></div>`;
             
-            // NEU: Kindkonto mit in der Liste
             [{n:'Urlaub',u:'Tage'},{n:'Stunden',u:'Std'},{n:'Kindkonto',u:'Std'},{n:'Kindkrank',u:'Tage'},{n:'DA',u:'Tage'},{n:'Langzeitkonto',u:'Std'},{n:'Sonderurlaub',u:'Tage'}].forEach(c => {
                  let s = 0; entries.filter(x=>x.cat===c.n).forEach(x => s += (x.mode==='earned'?x.hours:-x.hours)); let d = (c.u==='Tage') ? s/8 : s;
                  let bx = document.createElement('div'); bx.className='stat-box'; bx.innerHTML = `<div class="edit-icon">✎</div><h4>${c.n}</h4><span style="color:${d>=0?'#fff':'#ff453a'}">${formatNumber(d)}<span class="unit">${c.u}</span></span>`; bx.onclick = () => adjustStat(c.n, s, c.u); grid.appendChild(bx);
             });
             
             const today = new Date().toISOString().slice(0,10);
-            const upcoming = entries.filter(e => { ensureIsoDates(e); return e.isoEnd >= today; }).sort((a,b) => a.isoStart.localeCompare(b.isoStart)).slice(0, 5); 
+            
+            // NEU: Sortiert chronologisch UND filtert "Stunden Earned" raus
+            const upcoming = entries.filter(e => { 
+                if(!e.isoStart) return false;
+                if(e.isoEnd < today) return false; // Nur Zukunft
+                if(e.cat === 'Stunden' && e.mode === 'earned') return false; // KEINE STUNDEN BEKOMMEN
+                return true;
+            }).sort((a,b) => a.isoStart.localeCompare(b.isoStart)).slice(0, 5); 
+            
             let listHtml = upcoming.length ? '' : '<div style="font-size:11px; color:#666;">Keine Termine</div>';
             upcoming.forEach(u => {
                 let icon = '';
@@ -565,7 +593,15 @@
                 for(let d=1; d<=days; d++) {
                     const iso = `${currentCalYear}-${(i+1).toString().padStart(2,'0')}-${d.toString().padStart(2,'0')}`;
                     const evs = getEventsForDate(iso); 
-                    const cell = document.createElement('div'); cell.className = 'day-cell'; if(evs.length) cell.classList.add('has-event');
+                    
+                    const cell = document.createElement('div'); cell.className = 'day-cell';
+                    
+                    // CHECK HOLIDAY
+                    if(isThuringiaHoliday(iso)) {
+                        cell.classList.add('is-holiday');
+                    }
+
+                    if(evs.length) cell.classList.add('has-event');
                     let dots = ''; let limit = 4; let showEvs = evs.slice(0, limit);
                     showEvs.forEach(e => {
                         let icon = e.icon; 
@@ -585,6 +621,12 @@
                 let inRange = (iso >= e.isoStart && iso <= e.isoEnd);
                 if(!inRange) return false;
                 if(calendarFilter==='all') return true;
+                
+                // WENN FEIERTAGE GEWÄHLT, NUR FEIERTAGE ANZEIGEN?
+                // Der User will "Feiertage" sehen. Da diese keine Entries sind, 
+                // verstecken wir bei diesem Filter alle User-Entries, damit die grünen Zahlen gut sichtbar sind.
+                if(calendarFilter === 'Holiday') return false; 
+
                 if(calendarFilter==='StundenTaken') return e.cat === 'Stunden' && e.mode === 'taken';
                 if(calendarFilter==='StundenEarned') return e.cat === 'Stunden' && e.mode === 'earned';
                 if(['Urlaub','Arzttermin','Ausbildung','Übungsplatz','Übungsplatz Grün','UvD','UvD Standort','KvD','DA','Langzeitkonto','Sonderurlaub','Kindkrank','Sonstiges','Kindkonto'].includes(calendarFilter)) {
@@ -614,7 +656,13 @@
             modalCurrentIsoDate = iso; currentEditId = null; 
             document.getElementById('modal-date-title').innerText = formatDateDE(iso);
             const body = document.getElementById('modal-body'); body.innerHTML = '';
-            if(!events.length) body.innerHTML = '<div style="text-align:center;padding:5px;color:#666;font-size:12px;">Keine Einträge an diesem Tag</div>';
+            
+            // Auch Feiertag im Modal anzeigen
+            if(isThuringiaHoliday(iso)) {
+                 body.innerHTML += `<div style="text-align:center; margin-bottom:10px; color:#30D158; font-weight:bold;">⚠️ Feiertag / Ferien (Thüringen)</div>`;
+            }
+
+            if(!events.length) body.innerHTML += '<div style="text-align:center;padding:5px;color:#666;font-size:12px;">Keine Einträge an diesem Tag</div>';
             events.forEach(e => {
                 let col = '#fff'; let displayIcon = e.icon;
                 if(e.cat === 'Stunden') { if(e.mode === 'earned') displayIcon = '➕'; else displayIcon = '⏰'; col = 'var(--c-stunden)'; }
@@ -665,15 +713,8 @@
             document.querySelectorAll('.view').forEach(v=>v.classList.remove('active')); document.getElementById(id).classList.add('active');
             document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active')); if(el) el.classList.add('active');
             document.getElementById('header-title').innerText = ti;
-            
-            // RESET BTN NUR IN STATISTIK ANZEIGEN
             const resetBtn = document.getElementById('header-reset-btn');
-            if(id === 'view-stats') {
-                resetBtn.style.display = 'block';
-            } else {
-                resetBtn.style.display = 'none';
-            }
-            
+            if(id === 'view-stats') { resetBtn.style.display = 'block'; } else { resetBtn.style.display = 'none'; }
             if(id==='view-calendar') setTimeout(()=>{const c=document.getElementById('current-month-card'); if(c) c.scrollIntoView({behavior:"smooth",block:"center"});},100);
         }
         function resetAll() { if(confirm("ALLES LÖSCHEN? Reset?")) { localStorage.removeItem('trackData_v5'); entries=[]; updateUI(); } }
@@ -704,7 +745,7 @@
             document.getElementById('settings-modal').classList.remove('open'); 
             checkReminders(); updateUI(); 
         }
-        function exportData() { const b=new Blob([JSON.stringify({entries,settings})],{type:"application/json"}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download="backup_v48.json"; a.click(); }
+        function exportData() { const b=new Blob([JSON.stringify({entries,settings})],{type:"application/json"}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download="backup_v49.json"; a.click(); }
         function importData(inp) { const r=new FileReader(); r.onload=e=>{ let d=JSON.parse(e.target.result); if(Array.isArray(d)) entries=d; else { entries=d.entries; settings=d.settings; } localStorage.setItem('trackData_v5', JSON.stringify(entries)); updateUI(); }; r.readAsText(inp.files[0]); }
     </script>
 </body>
