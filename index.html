@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Arbeitszeit V56">
-    <title>Arbeitszeit Tracker V56</title>
+    <meta name="apple-mobile-web-app-title" content="Arbeitszeit V57">
+    <title>Arbeitszeit Tracker V57</title>
 
     <style>
         :root {
@@ -37,19 +37,19 @@
 
         main { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 90px; }
 
+        /* INPUT STYLES */
         .input-row { display: flex; gap: 10px; margin-bottom: 12px; }
         .input-col { flex: 1; min-width: 0; }
         label { display: block; color: var(--text-sub); font-size: 11px; margin-bottom: 5px; text-transform: uppercase; }
-        
         input, select, textarea { width: 100%; height: 45px; background-color: var(--input); border: 1px solid var(--card-border); color: white; padding: 10px; border-radius: 8px; font-size: 16px; box-sizing: border-box; -webkit-appearance: none; font-family: inherit; }
         textarea { resize: none; height: 70px; }
-        
         .btn { width: 100%; padding: 14px; border-radius: 8px; border: none; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 5px; }
         .btn-primary { background-color: var(--card-border); color: var(--accent); }
         .btn-list-view { width: 100%; padding: 10px; background: var(--accent); color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; margin-bottom: 10px; cursor: pointer; }
 
         .hidden { display: none !important; }
 
+        /* LIST ITEMS */
         .history-item, .list-view-item, .upcoming-item { background-color: var(--card); padding: 10px 12px; border-radius: 8px; margin-bottom: 6px; border-left: 4px solid #555; position: relative; display: flex; justify-content: space-between; align-items: center; }
         .cat-urlaub { border-left-color: var(--c-urlaub); }
         .cat-stunden { border-left-color: var(--c-stunden); }
@@ -68,44 +68,83 @@
         .h-btn-group { display: flex; gap: 10px; align-items: center; z-index: 10; position: relative; }
         .h-action-btn { background: #2c2c2e; border: 1px solid #444; color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; }
 
+        /* KALENDER HEADER */
         #cal-sticky-header { position: sticky; top: -15px; background-color: var(--bg); z-index: 50; padding-top: 15px; padding-bottom: 5px; margin-bottom: 10px; border-bottom: 1px solid var(--card-border); }
         .year-selector { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 18px; font-weight: bold; }
         .year-btn { background: none; border: none; color: var(--accent); font-size: 24px; cursor: pointer; padding: 0 20px; }
         
+        /* FILTER */
         .filter-wrapper { position: relative; display: inline-block; }
         .filter-toggle-btn { background: var(--card); border: 1px solid var(--card-border); color: var(--text-sub); padding: 6px 15px; border-radius: 15px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px; }
         .filter-toggle-btn.active { color: var(--accent); border-color: var(--accent); }
-        
         .filter-dropdown-menu { position: absolute; top: 35px; right: 0; background: #2c2c2e; border: 1px solid #444; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 200; display: none; flex-direction: column; min-width: 160px; max-height: 300px; overflow-y: auto; }
         .filter-dropdown-menu.show { display: flex; }
         .filter-option { padding: 12px 15px; color: #ddd; font-size: 13px; cursor: pointer; border-bottom: 1px solid #3a3a3c; }
         .filter-option:last-child { border-bottom: none; }
         .filter-option.selected { color: var(--accent); font-weight: bold; }
 
+        /* KALENDER GRID - NEUES DESIGN */
         .calendar-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
         @media (orientation: landscape) { .calendar-grid { grid-template-columns: 1fr 1fr 1fr; } }
         .month-card { background-color: var(--card); padding: 5px; border-radius: 8px; border: 1px solid var(--card-border); scroll-margin-top: 150px; }
         .month-name { text-align: center; font-weight: 700; margin: 8px 0; color: var(--text-sub); text-transform: uppercase; font-size: 13px; }
         .days-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; }
         .day-label { font-size: 9px; color: #555; padding-bottom: 5px; }
-        .day-cell { aspect-ratio: 1; display: flex; flex-direction: column; justify-content: space-between; align-items: center; font-size: 12px; border-radius: 4px; position: relative; cursor: pointer; background: rgba(255,255,255,0.03); overflow: hidden; padding: 2px 0; }
+        
+        .day-cell { 
+            aspect-ratio: 1; 
+            display: flex; 
+            flex-direction: column; 
+            /* ÄNDERUNG: Start oben statt space-between */
+            justify-content: flex-start; 
+            align-items: center; 
+            font-size: 12px; 
+            border-radius: 4px; 
+            position: relative; 
+            cursor: pointer; 
+            background: rgba(255,255,255,0.03); 
+            overflow: hidden; 
+            /* ÄNDERUNG: Kleiner Abstand oben */
+            padding-top: 4px; 
+        }
+        
         .day-cell.is-holiday span { color: var(--c-holiday) !important; font-weight: 900 !important; text-shadow: 0 0 5px rgba(48, 209, 88, 0.3); }
-        .event-dots { display: flex; justify-content: center; align-items: flex-end; flex-wrap: wrap; gap: 1px; width: 100%; height: 50%; padding-bottom: 2px; }
+        
+        .event-dots { 
+            display: flex; 
+            justify-content: center; 
+            align-items: flex-end; 
+            flex-wrap: wrap; 
+            gap: 1px; 
+            width: 100%; 
+            /* ÄNDERUNG: Punkte nach unten drücken */
+            margin-top: auto;
+            padding-bottom: 3px; 
+        }
         .event-icon { font-size: 9px; line-height: 1; text-shadow: 0 0 2px black;}
         .event-dot { width: 5px; height: 5px; border-radius: 50%; background-color: #555; }
 
-        /* HEUTE MARKIERUNG - 40% WEISS - ZAHL OBEN */
+        /* HEUTE MARKIERUNG - 35% WEISS - ZAHL OBEN */
         .day-cell.is-today {
-            /* Hintergrund: Oben 40% Weiß, Rest transparent/dunkel */
-            background: linear-gradient(to bottom, #ffffff 40%, rgba(255,255,255,0.03) 40%) !important;
-            border: 1px solid #999;
+            /* Hintergrund: Oben 35% Weiß, Rest transparent/dunkel */
+            background: linear-gradient(to bottom, #ffffff 35%, rgba(255,255,255,0.03) 35%) !important;
+            border: 1px solid #888;
         }
         .day-cell.is-today > span {
             color: #000000 !important; /* Zahl Schwarz */
             font-weight: 900 !important;
-            /* KEIN PADDING MEHR - Zahl bleibt oben */
         }
 
+        /* DASHBOARD STYLES (HOME) */
+        .dashboard-card { background: var(--card); padding: 20px; border-radius: 16px; border: 1px solid var(--card-border); margin-bottom: 15px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .dash-label { color: var(--text-sub); font-size: 11px; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 1px; }
+        .dash-title { font-size: 28px; font-weight: 800; color: var(--accent); margin-bottom: 5px; line-height: 1.2; }
+        .dash-date { font-size: 16px; color: white; margin-bottom: 5px; font-weight: 600; }
+        .dash-time { font-size: 14px; color: #ccc; margin-bottom: 15px; }
+        .dash-note { font-size: 13px; color: #888; font-style: italic; background: rgba(255,255,255,0.05); padding: 8px; border-radius: 8px; display: inline-block; max-width: 100%; }
+        .dash-empty { color: #555; font-size: 16px; padding: 30px 0; }
+        
+        /* MODALS */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 1000; display: none; justify-content: center; align-items: center; }
         .modal-overlay.open { display: flex; }
         .modal-content { background: #1c1c1e; width: 90%; max-width: 380px; padding: 20px; border-radius: 18px; border: 1px solid #333; box-shadow: 0 20px 40px rgba(0,0,0,0.6); max-height: 85vh; overflow-y: auto; }
@@ -113,6 +152,7 @@
         .modal-title { font-size: 17px; font-weight: 700; }
         .close-btn { background: none; border: none; font-size: 28px; color: #888; cursor: pointer; line-height: 1; }
         
+        /* REMINDER */
         .reminder-box { text-align: center; padding: 10px 0; }
         .reminder-icon { font-size: 40px; margin-bottom: 10px; display: block; }
         .reminder-text { font-size: 16px; margin-bottom: 20px; line-height: 1.4; }
@@ -121,6 +161,7 @@
         .btn-rem-yes { background: var(--accent); color: white; flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 14px; }
         .btn-rem-no { background: #333; color: #aaa; flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 14px; }
 
+        /* CATEGORY GRID & STATS */
         .category-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 20px; }
         .cat-btn { background: #2c2c2e; border: 1px solid transparent; color: #ddd; padding: 12px 5px; border-radius: 10px; font-size: 10px; text-align: center; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: all 0.15s; }
         .cat-btn:active { transform: scale(0.95); background: #3a3a3c; }
@@ -139,6 +180,7 @@
         .stat-box.summary div { display: flex; flex-direction: column; align-items: center; }
         .stat-box.full-width { grid-column: span 3; padding: 8px; cursor: default; text-align: left;}
 
+        /* TOOLS */
         .data-tools { margin-top: 10px; padding-top: 15px; border-top: 1px solid var(--card-border); display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .btn-settings-big { grid-column: span 2; background: #2c2c2e; border: 1px solid #555; color: white; padding: 15px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; text-align: center; }
         .btn-tool { padding: 10px; background: var(--card); border: 1px solid var(--card-border); color: var(--text); border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
@@ -159,7 +201,9 @@
         input:checked + .slider:before { transform: translateX(16px); }
 
         nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.95); border-top: 1px solid #333; display: flex; height: 50px; padding-bottom: env(safe-area-inset-bottom); z-index: 500; }
-        .nav-item { flex: 1; display: flex; justify-content: center; align-items: center; color: #666; font-size: 22px; transition: color 0.2s; }
+        .nav-item { flex: 1; display: flex; justify-content: center; align-items: center; color: #666; font-size: 14px; flex-direction: column; gap: 3px; padding-top: 5px; transition: color 0.2s; }
+        .nav-item span { font-size: 20px; }
+        .nav-item div { font-size: 10px; font-weight: 600; }
         .nav-item.active { color: var(--accent); }
         .view { display: none; } .view.active { display: block; }
     </style>
@@ -167,12 +211,24 @@
 <body>
 
     <header>
-        <h1 id="header-title">Buchen</h1>
+        <h1 id="header-title">Start</h1>
         <button id="header-reset-btn" onclick="resetAll()">🗑️</button>
     </header>
 
     <main>
-        <div id="view-input" class="view active">
+        <div id="view-home" class="view active">
+            <div class="dashboard-card">
+                <div class="dash-label">Als Nächstes</div>
+                <div id="dash-next-content">
+                    </div>
+            </div>
+            
+            <div style="text-align:center; margin-top:30px; color:#555; font-size:12px;">
+                Einen schönen Tag!
+            </div>
+        </div>
+
+        <div id="view-input" class="view">
             <div style="margin-bottom:20px; color:#0A84FF; font-size:16px; font-weight:bold; text-align:center; padding-bottom:10px; border-bottom:1px solid #333;">
                 ⏰ Stunden gutschreiben
             </div>
@@ -209,18 +265,14 @@
                          </div>
                          <div class="filter-dropdown-menu" id="filter-menu">
                              <div class="filter-option selected" onclick="applyFilter('all', 'Alle')">Alle</div>
-                             
                              <div class="filter-option" onclick="applyFilter('Dienst', '🪖 Dienst')">🪖 Dienst</div>
-
                              <div class="filter-option" onclick="applyFilter('Holiday', 'Feiertage & Ferien')">Feiertage & Ferien</div>
                              <div class="filter-option" onclick="applyFilter('Urlaub', 'Urlaub')">Urlaub</div>
                              <div class="filter-option" onclick="applyFilter('Kindkonto', 'Kindkonto')">Kindkonto</div>
                              <div class="filter-option" onclick="applyFilter('StundenTaken', 'Stunden (Genommen)')">Stunden (Genommen)</div>
                              <div class="filter-option" onclick="applyFilter('StundenEarned', 'Stunden (Bekommen)')">Stunden (Bekommen)</div>
-                             
                              <div class="filter-option" onclick="applyFilter('Übungsplatz', 'Übungspl. (Blau)')">Übungspl. (Blau)</div>
                              <div class="filter-option" onclick="applyFilter('Übungsplatz Grün', 'Übungspl. (Grün)')">Übungspl. (Grün)</div>
-                             
                              <div class="filter-option" onclick="applyFilter('Arzttermin', 'Arzt')">Arzt</div>
                              <div class="filter-option" onclick="applyFilter('Ausbildung', 'Ausbildung')">Ausbildung</div>
                              <div class="filter-option" onclick="applyFilter('UvD', 'UvD')">UvD</div>
@@ -344,10 +396,26 @@
     </div>
 
     <nav>
-        <div class="nav-item active" onclick="showView('view-input', this, 'Eingabe')">⌨️</div>
-        <div class="nav-item" onclick="showView('view-calendar', this, 'Kalender')">📅</div>
-        <div class="nav-item" onclick="showView('view-history', this, 'Verlauf')">≡</div>
-        <div class="nav-item" onclick="showView('view-stats', this, 'Statistik')">📊</div>
+        <div class="nav-item active" onclick="showView('view-home', this, 'Start')">
+            <span>🏠</span>
+            <div>Start</div>
+        </div>
+        <div class="nav-item" onclick="showView('view-input', this, 'Buchen')">
+            <span>➕</span>
+            <div>Buchen</div>
+        </div>
+        <div class="nav-item" onclick="showView('view-calendar', this, 'Kalender')">
+            <span>📅</span>
+            <div>Kalender</div>
+        </div>
+        <div class="nav-item" onclick="showView('view-history', this, 'Verlauf')">
+            <span>≡</span>
+            <div>Verlauf</div>
+        </div>
+        <div class="nav-item" onclick="showView('view-stats', this, 'Statistik')">
+            <span>📊</span>
+            <div>Statistik</div>
+        </div>
     </nav>
     <script>
         let entries = JSON.parse(localStorage.getItem('trackData_v5')) || [];
@@ -495,13 +563,13 @@
         function editEntry(id) {
             const e = entries.find(x => x.id === id); if(!e) return;
             if(e.cat === 'Stunden' && e.mode === 'earned') {
-                showView('view-input', document.querySelectorAll('.nav-item')[0], 'Eingabe');
+                showView('view-input', document.querySelectorAll('.nav-item')[1], 'Buchen'); // Index 1 ist Buchen
                 document.getElementById('date-start-time').value = e.isoStart; document.getElementById('date-end-time').value = e.isoEnd;
                 const times = e.timeDesc.match(/(\d{2}:\d{2})/g); if(times && times.length >= 2) { document.getElementById('time-start').value = times[0]; document.getElementById('time-end').value = times[1]; }
                 document.getElementById('hours-manual-val').value = e.hours; document.getElementById('inp-note').value = e.note || "";
                 currentEditId = id; document.getElementById('btn-save-main').innerText = "Änderung speichern"; document.getElementById('edit-mode-hint').style.display = 'block'; return;
             }
-             closeListView({target:{id:'list-view-modal'}}); showView('view-calendar', document.querySelectorAll('.nav-item')[1], 'Kalender'); modalCurrentIsoDate = e.isoStart; openModal(e.isoStart, getEventsForDate(e.isoStart));
+             closeListView({target:{id:'list-view-modal'}}); showView('view-calendar', document.querySelectorAll('.nav-item')[2], 'Kalender'); modalCurrentIsoDate = e.isoStart; openModal(e.isoStart, getEventsForDate(e.isoStart));
              setTimeout(() => {
                  document.getElementById('modal-date-start').value = e.isoStart; document.getElementById('modal-date-end').value = e.isoEnd;
                  const times = e.timeDesc.match(/(\d{2}:\d{2})/g); if(times && times.length >= 1) document.getElementById('modal-time-start').value = times[0]; if(times && times.length >= 2) document.getElementById('modal-time-end').value = times[1];
@@ -512,7 +580,7 @@
         }
         function deleteEntry(id) { if(confirm("Löschen?")) { entries = entries.filter(e => e.id !== id); localStorage.setItem('trackData_v5', JSON.stringify(entries)); updateUI(); if(document.getElementById('day-modal').classList.contains('open')) { const evs = getEventsForDate(modalCurrentIsoDate); openModal(modalCurrentIsoDate, evs); } } }
         
-        function updateUI() { renderHistory(); renderStats(); renderCalendar(); }
+        function updateUI() { renderHistory(); renderStats(); renderCalendar(); renderHome(); }
         function ensureIsoDates(e) { if(e.isoStart) return; }
 
         function renderHistory() {
@@ -528,6 +596,40 @@
             });
         }
         
+        // --- NEU: HILFSFUNKTION FÜR ZUKÜNFTIGE TERMINE (MIT UHRZEIT) ---
+        function getStrictUpcomingEvents() {
+            const now = new Date();
+            const todayStr = now.toISOString().slice(0,10);
+            const nowTimeStr = now.toTimeString().slice(0,5);
+
+            return entries.filter(e => { 
+                if(!e.isoStart) return false;
+                
+                // Filter: Keine Plus-Stunden
+                if(e.mode === 'earned') return false; 
+                if(e.cat === 'Stunden' && e.hours > 0 && e.mode !== 'taken') return false; 
+
+                // Zeit-Logik
+                if (e.isoStart > todayStr) return true; // Zukunft
+                if (e.isoStart < todayStr) return false; // Vergangenheit
+                
+                // Wenn heute: Prüfe Uhrzeit
+                // Hole Startzeit aus timeDesc (z.B. "14:00 - ...")
+                let startT = "23:59"; // Fallback: Wenn keine Zeit, zeige es heute noch an (Ganztägig)
+                const m = e.timeDesc.match(/(\d{2}:\d{2})/);
+                if (m) { startT = m[1]; }
+                else if (e.timeDesc.includes("Ganztägig")) { startT = "23:59"; } // Ganztägig gilt bis Ende des Tages
+
+                // Wenn Terminzeit < Jetztzeit => Vorbei
+                return startT >= nowTimeStr;
+            }).sort((a, b) => {
+                if (a.isoStart !== b.isoStart) { return a.isoStart.localeCompare(b.isoStart); }
+                let tA = (a.timeDesc && a.timeDesc.match(/(\d{2}:\d{2})/)) ? a.timeDesc.match(/(\d{2}:\d{2})/)[0] : "00:00";
+                let tB = (b.timeDesc && b.timeDesc.match(/(\d{2}:\d{2})/)) ? b.timeDesc.match(/(\d{2}:\d{2})/)[0] : "00:00";
+                return tA.localeCompare(tB);
+            });
+        }
+
         function renderStats() {
             const grid = document.getElementById('stats-grid'); grid.innerHTML = '';
             let tDays = 0, tHours = 0;
@@ -539,23 +641,8 @@
                  let bx = document.createElement('div'); bx.className='stat-box'; bx.innerHTML = `<div class="edit-icon">✎</div><h4>${c.n}</h4><span style="color:${d>=0?'#fff':'#ff453a'}">${formatNumber(d)}<span class="unit">${c.u}</span></span>`; bx.onclick = () => adjustStat(c.n, s, c.u); grid.appendChild(bx);
             });
             
-            const today = new Date().toISOString().slice(0,10);
-            
-            const upcoming = entries.filter(e => { 
-                if(!e.isoStart) return false;
-                if(e.isoEnd < today) return false; 
-                if(e.mode === 'earned') return false; 
-                if(e.cat === 'Stunden' && e.hours > 0 && e.mode !== 'taken') return false; 
-                return true;
-            });
-
-            upcoming.sort((a, b) => {
-                if (a.isoStart !== b.isoStart) { return a.isoStart.localeCompare(b.isoStart); }
-                let tA = (a.timeDesc && a.timeDesc.match(/(\d{2}:\d{2})/)) ? a.timeDesc.match(/(\d{2}:\d{2})/)[0] : "00:00";
-                let tB = (b.timeDesc && b.timeDesc.match(/(\d{2}:\d{2})/)) ? b.timeDesc.match(/(\d{2}:\d{2})/)[0] : "00:00";
-                return tA.localeCompare(tB);
-            });
-            
+            // VERWENDUNG DER NEUEN FUNKTION FÜR STATISTIK
+            const upcoming = getStrictUpcomingEvents();
             const top5 = upcoming.slice(0, 5);
             
             let listHtml = top5.length ? '' : '<div style="font-size:11px; color:#666;">Keine Termine</div>';
@@ -566,6 +653,29 @@
                 listHtml += `<div class="upcoming-item" style="padding:6px 10px; margin-bottom:4px; display:block;"><div style="display:flex; justify-content:space-between; align-items:center;"><span style="display:flex; align-items:center;"><span class="u-icon" style="font-size:12px; width:15px;">${icon}</span><span style="font-size:12px;">${u.cat}</span></span><span style="font-size:11px; color:#888;">${formatDateDE(u.isoStart).slice(0,6)}</span></div>${noteHtml}</div>`;
             });
             let upBox = document.createElement('div'); upBox.className = 'stat-box full-width'; upBox.innerHTML = `<h4>Nächste Termine</h4>${listHtml}`; grid.appendChild(upBox);
+        }
+
+        // --- NEU: RENDER HOME (STARTSEITE) ---
+        function renderHome() {
+            const container = document.getElementById('dash-next-content');
+            const upcoming = getStrictUpcomingEvents();
+
+            if (upcoming.length === 0) {
+                container.innerHTML = '<div class="dash-empty">Alles erledigt! 🎉<br><span style="font-size:12px; color:#888;">Keine anstehenden Termine.</span></div>';
+                return;
+            }
+
+            const next = upcoming[0]; // Das allererste Event
+            let icon = next.icon || (CAT_CONFIG[next.cat] ? CAT_CONFIG[next.cat].icon : '📅');
+            if(next.cat === 'Stunden' && next.mode === 'taken') icon = '⏰';
+
+            container.innerHTML = `
+                <div style="font-size:40px; margin-bottom:10px;">${icon}</div>
+                <div class="dash-title">${next.cat}</div>
+                <div class="dash-date">${formatDateDE(next.isoStart)}</div>
+                <div class="dash-time">${next.timeDesc}</div>
+                ${next.note ? `<div class="dash-note">${next.note}</div>` : ''}
+            `;
         }
 
         function adjustStat(name, curr, unit) {
@@ -656,15 +766,8 @@
 
             sub.innerText = titleText;
 
-            const today = new Date().toISOString().slice(0,10);
-            const filtered = entries.filter(e => { 
-                ensureIsoDates(e); 
-                if(e.isoEnd < today) return false;
-                if(e.mode === 'earned') return false; 
-                if(e.cat === 'Stunden' && e.hours > 0 && e.mode !== 'taken') return false;
-
-                return filterFunc(e);
-            }).sort((a,b) => new Date(a.isoStart) - new Date(b.isoStart));
+            // VERWENDUNG DER NEUEN FILTER LOGIK AUCH HIER
+            const filtered = getStrictUpcomingEvents().filter(filterFunc);
 
             if(!filtered.length) list.innerHTML = '<div style="text-align:center;padding:20px;color:#666">Keine Einträge gefunden</div>';
             filtered.forEach(e => {
@@ -732,7 +835,7 @@
 
         function closeModalDirect() { document.getElementById('day-modal').classList.remove('open'); }
         function closeModal(e) { if(e.target.id==='day-modal') closeModalDirect(); }
-        function jumpToDate(iso) { closeListView({target:{id:'list-view-modal'}}); showView('view-calendar',document.querySelectorAll('.nav-item')[1],'Kalender'); openModal(iso, getEventsForDate(iso)); }
+        function jumpToDate(iso) { closeListView({target:{id:'list-view-modal'}}); showView('view-calendar',document.querySelectorAll('.nav-item')[2],'Kalender'); openModal(iso, getEventsForDate(iso)); }
         
         function showView(id,el,ti) {
             document.querySelectorAll('.view').forEach(v=>v.classList.remove('active')); document.getElementById(id).classList.add('active');
@@ -770,7 +873,7 @@
             document.getElementById('settings-modal').classList.remove('open'); 
             checkReminders(); updateUI(); 
         }
-        function exportData() { const b=new Blob([JSON.stringify({entries,settings})],{type:"application/json"}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download="backup_v56.json"; a.click(); }
+        function exportData() { const b=new Blob([JSON.stringify({entries,settings})],{type:"application/json"}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download="backup_v57.json"; a.click(); }
         function importData(inp) { const r=new FileReader(); r.onload=e=>{ let d=JSON.parse(e.target.result); if(Array.isArray(d)) entries=d; else { entries=d.entries; settings=d.settings; } localStorage.setItem('trackData_v5', JSON.stringify(entries)); updateUI(); }; r.readAsText(inp.files[0]); }
     </script>
 </body>
