@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Arbeitszeit V58">
-    <title>Arbeitszeit Tracker V58</title>
+    <meta name="apple-mobile-web-app-title" content="Arbeitszeit V59">
+    <title>Arbeitszeit Tracker V59</title>
 
     <style>
         :root {
@@ -103,14 +103,10 @@
             cursor: pointer; 
             background: rgba(255,255,255,0.03); 
             overflow: hidden; 
-            /* ÄNDERUNG: Minimales Padding oben, damit Zahl ganz oben klebt */
             padding-top: 1px; 
         }
         
-        .day-cell span {
-            line-height: 1.1; /* Zahl kompakt halten */
-        }
-        
+        .day-cell span { line-height: 1.1; }
         .day-cell.is-holiday span { color: var(--c-holiday) !important; font-weight: 900 !important; text-shadow: 0 0 5px rgba(48, 209, 88, 0.3); }
         
         .event-dots { 
@@ -132,7 +128,7 @@
             border: 1px solid #888;
         }
         .day-cell.is-today > span {
-            color: #000000 !important; /* Zahl Schwarz */
+            color: #000000 !important; 
             font-weight: 900 !important;
         }
 
@@ -170,7 +166,6 @@
         .edit-icon { position: absolute; top: 2px; right: 2px; font-size: 10px; opacity: 0.3; }
         .stat-box.summary { grid-column: span 3; display: flex; justify-content: space-around; align-items: center; padding: 8px 10px; background: #2c2c2e; border-color: #555; cursor: default; }
         .stat-box.summary div { display: flex; flex-direction: column; align-items: center; }
-        /* Entfernt: stat-box.full-width wird nicht mehr benötigt */
 
         /* TOOLS */
         .data-tools { margin-top: 10px; padding-top: 15px; border-top: 1px solid var(--card-border); display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -210,12 +205,8 @@
     <main>
         <div id="view-home" class="view active">
             <h2 style="margin: 5px 0 15px; font-size: 16px; color: var(--accent); text-transform: uppercase; letter-spacing: 1px;">Kommende Termine</h2>
-            <div id="dash-list">
-                </div>
-            
-            <div style="text-align:center; margin-top:30px; color:#555; font-size:12px;">
-                Einen schönen Tag!
-            </div>
+            <div id="dash-list"></div>
+            <div style="text-align:center; margin-top:30px; color:#555; font-size:12px;">Einen schönen Tag!</div>
         </div>
 
         <div id="view-input" class="view">
@@ -368,20 +359,6 @@
                 <input type="text" id="modal-note-input" placeholder="Text hinzufügen..." style="width:100%;">
             </div>
             <button class="btn btn-primary" onclick="saveModalEntry()" style="padding:10px; font-size:14px;">Eintrag Speichern</button>
-        </div>
-    </div>
-
-    <div id="settings-modal" class="modal-overlay" onclick="closeSettings(event)">
-        <div class="modal-content">
-            <div class="modal-header"><div class="modal-title">Einstellungen</div><button class="close-btn" onclick="document.getElementById('settings-modal').classList.remove('open')">×</button></div>
-            
-            <div style="margin-bottom:15px; font-weight:bold; color:var(--accent); font-size:14px;">Erinnerungen konfigurieren</div>
-            <div id="reminders-config-container"></div>
-
-            <div style="margin-top:20px; margin-bottom:15px; font-weight:bold; color:var(--accent); font-size:14px; border-top:1px solid #333; padding-top:10px;">Standard Arbeitszeiten</div>
-            <table class="settings-table"><thead><tr><th>Tag</th><th>Von</th><th>Bis</th></tr></thead><tbody id="settings-tbody"></tbody></table>
-            
-            <button class="btn btn-primary" onclick="saveSettings()" style="margin-top:20px;">Speichern</button>
         </div>
     </div>
 
@@ -623,14 +600,12 @@
             });
         }
 
-        // --- RENDER HOME (LISTE) ---
+        // --- RENDER HOME ---
         function renderHome() {
             const container = document.getElementById('dash-list');
             container.innerHTML = '';
             
             const upcoming = getStrictUpcomingEvents();
-            
-            // Limit auf 10
             const displayList = upcoming.slice(0, 10);
 
             if (displayList.length === 0) {
@@ -772,7 +747,21 @@
                 if(e.cat === 'Stunden') { if(e.mode === 'earned') displayIcon = '➕'; else displayIcon = '⏰'; col = 'var(--c-stunden)'; }
                 else if(['Urlaub','DA','Kindkrank','Sonderurlaub','Kindkonto'].includes(e.cat)) col = 'var(--c-urlaub)';
                 else if(['Langzeitkonto'].includes(e.cat)) col = 'var(--c-lzk)';
-                body.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px solid #333; padding-bottom:5px;"><div><div style="font-weight:bold; color:${col}; font-size:14px;">${displayIcon} ${e.cat}</div><div style="font-size:12px; color:#aaa">${e.timeDesc}</div>${e.note ? `<div style="font-size:11px;color:#888;font-style:italic;">${e.note}</div>` : ''}</div><div style="display:flex; gap:10px;"><button style="background:none; border:none; font-size:16px; cursor:pointer;" onclick="editEntry(${e.id})">✎</button><button style="background:none; border:none; color:#ff453a; font-size:16px; cursor:pointer;" onclick="deleteEntry(${e.id})">🗑️</button></div></div>`;
+                
+                // --- NEU: KALENDER BUTTON HINZUGEFÜGT ---
+                body.innerHTML += `
+                <div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px solid #333; padding-bottom:5px;">
+                    <div>
+                        <div style="font-weight:bold; color:${col}; font-size:14px;">${displayIcon} ${e.cat}</div>
+                        <div style="font-size:12px; color:#aaa">${e.timeDesc}</div>
+                        ${e.note ? `<div style="font-size:11px;color:#888;font-style:italic;">${e.note}</div>` : ''}
+                    </div>
+                    <div style="display:flex; gap:10px;">
+                        <button style="background:none; border:none; font-size:16px; cursor:pointer;" onclick="downloadIcs(${e.id})">📅</button>
+                        <button style="background:none; border:none; font-size:16px; cursor:pointer;" onclick="editEntry(${e.id})">✎</button>
+                        <button style="background:none; border:none; color:#ff453a; font-size:16px; cursor:pointer;" onclick="deleteEntry(${e.id})">🗑️</button>
+                    </div>
+                </div>`;
             });
             document.getElementById('modal-date-start').value = iso; document.getElementById('modal-date-end').value = iso;
             document.getElementById('modal-time-start').value = ""; document.getElementById('modal-time-end').value = ""; 
@@ -782,6 +771,46 @@
             document.getElementById('modal-selection-display').innerText = "Wähle eine Kategorie...";
             modalSelected = { cat: '', icon: '', type: '' };
             document.getElementById('day-modal').classList.add('open');
+        }
+
+        // --- NEU: ICS DOWNLOAD FUNKTION ---
+        function downloadIcs(id) {
+            const e = entries.find(x => x.id === id); if(!e) return;
+            const startStr = e.isoStart.replace(/-/g, '') + 'T' + (e.timeDesc.match(/(\d{2}):(\d{2})/) ? e.timeDesc.match(/(\d{2}):(\d{2})/)[0].replace(':','') + '00' : '080000');
+            const endStr = e.isoEnd.replace(/-/g, '') + 'T' + (e.timeDesc.match(/(\d{2}):(\d{2})/) && e.timeDesc.match(/(\d{2}):(\d{2})/).length > 2 ? e.timeDesc.match(/(\d{2}):(\d{2})/)[2].replace(':','') + '00' : '170000');
+            
+            // Definiere Alarme: 1 Tag vorher (-P1D) und 1 Stunde vorher (-PT1H)
+            const icsContent = 
+`BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//ArbeitszeitTracker//DE
+BEGIN:VEVENT
+UID:${e.id}@tracker.app
+DTSTAMP:${new Date().toISOString().replace(/[-:]/g,'').split('.')[0]}Z
+DTSTART:${startStr}
+DTEND:${endStr}
+SUMMARY:${e.cat}
+DESCRIPTION:${e.note || ''}
+BEGIN:VALARM
+TRIGGER:-P1D
+DESCRIPTION:Erinnerung 1 Tag vorher
+ACTION:DISPLAY
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT1H
+DESCRIPTION:Erinnerung 1 Stunde vorher
+ACTION:DISPLAY
+END:VALARM
+END:VEVENT
+END:VCALENDAR`;
+
+            const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.setAttribute('download', 'termin.ics');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
         function selectModalCat(btn, cat, icon, type) {
@@ -849,7 +878,7 @@
             document.getElementById('settings-modal').classList.remove('open'); 
             checkReminders(); updateUI(); 
         }
-        function exportData() { const b=new Blob([JSON.stringify({entries,settings})],{type:"application/json"}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download="backup_v58.json"; a.click(); }
+        function exportData() { const b=new Blob([JSON.stringify({entries,settings})],{type:"application/json"}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download="backup_v59.json"; a.click(); }
         function importData(inp) { const r=new FileReader(); r.onload=e=>{ let d=JSON.parse(e.target.result); if(Array.isArray(d)) entries=d; else { entries=d.entries; settings=d.settings; } localStorage.setItem('trackData_v5', JSON.stringify(entries)); updateUI(); }; r.readAsText(inp.files[0]); }
     </script>
 </body>
