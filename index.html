@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Arbeitszeit V59">
-    <title>Arbeitszeit Tracker V59</title>
+    <meta name="apple-mobile-web-app-title" content="Arbeitszeit V60">
+    <title>Arbeitszeit Tracker V60</title>
 
     <style>
         :root {
@@ -748,7 +748,6 @@
                 else if(['Urlaub','DA','Kindkrank','Sonderurlaub','Kindkonto'].includes(e.cat)) col = 'var(--c-urlaub)';
                 else if(['Langzeitkonto'].includes(e.cat)) col = 'var(--c-lzk)';
                 
-                // --- NEU: KALENDER BUTTON HINZUGEFÜGT ---
                 body.innerHTML += `
                 <div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px solid #333; padding-bottom:5px;">
                     <div>
@@ -773,13 +772,12 @@
             document.getElementById('day-modal').classList.add('open');
         }
 
-        // --- NEU: ICS DOWNLOAD FUNKTION ---
+        // --- ICS DOWNLOAD FUNKTION MIT HILFE-ALERT ---
         function downloadIcs(id) {
             const e = entries.find(x => x.id === id); if(!e) return;
             const startStr = e.isoStart.replace(/-/g, '') + 'T' + (e.timeDesc.match(/(\d{2}):(\d{2})/) ? e.timeDesc.match(/(\d{2}):(\d{2})/)[0].replace(':','') + '00' : '080000');
             const endStr = e.isoEnd.replace(/-/g, '') + 'T' + (e.timeDesc.match(/(\d{2}):(\d{2})/) && e.timeDesc.match(/(\d{2}):(\d{2})/).length > 2 ? e.timeDesc.match(/(\d{2}):(\d{2})/)[2].replace(':','') + '00' : '170000');
             
-            // Definiere Alarme: 1 Tag vorher (-P1D) und 1 Stunde vorher (-PT1H)
             const icsContent = 
 `BEGIN:VCALENDAR
 VERSION:2.0
@@ -811,6 +809,11 @@ END:VCALENDAR`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+
+            // ZUSÄTZLICHER HINWEIS FÜR IPHONE NUTZER
+            setTimeout(() => {
+                alert("📅 Die Kalender-Datei wurde erstellt.\n\nSo fügst du sie hinzu:\n1. Tippe auf 'Laden'\n2. Öffne deine Downloads (blauer Pfeil im Browser)\n3. Tippe auf die Datei 'termin.ics'\n4. Wähle 'Zu Kalender hinzufügen'");
+            }, 500);
         }
 
         function selectModalCat(btn, cat, icon, type) {
@@ -878,7 +881,7 @@ END:VCALENDAR`;
             document.getElementById('settings-modal').classList.remove('open'); 
             checkReminders(); updateUI(); 
         }
-        function exportData() { const b=new Blob([JSON.stringify({entries,settings})],{type:"application/json"}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download="backup_v59.json"; a.click(); }
+        function exportData() { const b=new Blob([JSON.stringify({entries,settings})],{type:"application/json"}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download="backup_v60.json"; a.click(); }
         function importData(inp) { const r=new FileReader(); r.onload=e=>{ let d=JSON.parse(e.target.result); if(Array.isArray(d)) entries=d; else { entries=d.entries; settings=d.settings; } localStorage.setItem('trackData_v5', JSON.stringify(entries)); updateUI(); }; r.readAsText(inp.files[0]); }
     </script>
 </body>
